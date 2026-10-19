@@ -1,7 +1,7 @@
 {
   "name": "drillplot",
   "version": "0.1.0",
-  "description": "Draw pickleball drill diagrams on a to-scale court and export editable SVG.",
+  "description": "Pickleball drill diagram editor (a web component) and SVG renderer: draw players, cones and numbered shots on a to-scale court, then export editable SVG.",
   "license": "MIT",
   "author": "Mike LP",
   "repository": {
@@ -22,7 +22,14 @@
     "diagram",
     "svg",
     "coaching",
-    "court"
+    "court",
+    "web-component",
+    "custom-element",
+    "diagram-editor",
+    "svg-editor",
+    "json-schema",
+    "typescript",
+    "esm"
   ],
   "sideEffects": [
     "./dist/editor.js"
@@ -52,7 +59,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+    "prepublishOnly": "npm run typecheck && npm test && npm run build",
+    "docs:check": "node scripts/check-docs.mjs"
   },
   "devDependencies": {
     "@types/node": "26.6.5",
