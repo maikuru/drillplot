@@ -155,6 +155,17 @@ Open `demo/index.html` through any static file server after `build:demo`. Please
 
 The code is TypeScript in strict mode. `src/format` is the types and the validator, `src/render` is the SVG renderer, `src/editor` is the custom element (its state and undo live in `model.ts` with no DOM, so they are tested without a browser).
 
+## Releasing
+
+Releases publish from GitHub Actions with npm's trusted publishing: the workflow proves who it is to npm over OIDC, so no npm token is stored anywhere, and npm records the release's provenance. To release, bump the version and push its tag:
+
+```sh
+npm version patch   # or minor, major; commits and tags vX.Y.Z
+git push --follow-tags
+```
+
+The Release workflow ([.github/workflows/release.yml](.github/workflows/release.yml)) refuses a tag that does not match `package.json`, then runs the typecheck, the tests and the build before publishing.
+
 ## License
 
 [MIT](LICENSE).
