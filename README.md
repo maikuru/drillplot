@@ -10,7 +10,7 @@ drillplot is a browser tool and a small library. You place players, cones, a bal
 npm install drillplot
 ```
 
-It ships ES modules and TypeScript types, and needs Node 20 or newer to build and test. To work from a clone instead, see [Contributing](#contributing).
+It ships ES modules and TypeScript types, and has no runtime dependencies. Building and testing it needs Node 22 or newer. To work from a clone instead, see [Contributing](#contributing).
 
 Entry points: `drillplot` (format, validator and renderer, no DOM needed), `drillplot/editor` (registers `<drillplot-editor>` and exports `defineDrillplotEditor`, `DrillplotEditor`, `DrillModel` and `TOKENS`) and `drillplot/schema` (the JSON Schema).
 
