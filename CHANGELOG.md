@@ -4,6 +4,25 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+### Changed
+
+- The schema `$id` is now `https://maikuru.github.io/drillplot/schema/drill-diagram.v1.schema.json`, and the shipped schema compiles as-is.
+- Text may not contain control characters, U+FFFE or U+FFFF, or unpaired surrogates (new error key `bad_character`; the caption may keep tabs and line breaks). Such characters made exported SVGs malformed XML. The renderer also strips them.
+- Shot numbers are capped at 200 in the validator and schema; the renderer writes `n` as a whole number.
+- An angle that rounds up to 360 (359.995 up to 360) is accepted and becomes 0, matching the schema.
+- Package metadata: author, repository, homepage, bugs, `engines` (Node 20 or newer), `prepublishOnly`.
+- Dev dependencies bumped to versions without known advisories.
+
+### Fixed
+
+- The keyboard focus ring on the checked view and orientation option is now visible; the pressed tool button has a solid fill.
+- Undoing Open from source restores the title and caption fields.
+- Escape closes a sheet and returns focus to the button that opened it.
+- `defineDrillplotEditor(name)` works for a custom tag name.
+- Live regions, the piece list and the panels are no longer rewritten on every pointer move.
+- The aim slider steps by 1, so a loaded angle is not snapped.
+- Metadata inside an XML comment is ignored when opening an SVG.
+
 ## [0.1.0] - 2026-10-19
 
 ### Added

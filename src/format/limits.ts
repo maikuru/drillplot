@@ -12,6 +12,8 @@ export const BOUNDS = {
 
 export const LIMITS = {
   maxItems: 200,
+  /** Highest shot number. */
+  maxShot: 200,
   titleLength: 120,
   captionLength: 300,
   playerLabelLength: 8,

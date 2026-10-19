@@ -18,7 +18,8 @@ const decodeEntities = (s: string): string =>
  * Reads both escaped text and a CDATA section (the earlier concept's exports used CDATA).
  */
 export function extractSourceText(svg: string): string | null {
-  const m = /<metadata(?:\s[^>]*)?>([\s\S]*?)<\/metadata>/i.exec(svg);
+  const bare = svg.replace(/<!--[\s\S]*?-->/g, '');
+  const m = /<metadata(?:\s[^>]*)?>([\s\S]*?)<\/metadata>/i.exec(bare);
   if (!m || m[1] === undefined) return null;
   const inner = m[1].trim();
   if (!inner) return null;

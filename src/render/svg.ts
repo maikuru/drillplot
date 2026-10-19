@@ -13,7 +13,10 @@ export interface RenderOptions {
 
 /** The source as it is embedded: JSON, XML-escaped so it is plain text inside <metadata>. */
 export function embedSource(source: DrillSource): string {
-  return stringifySource(source).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // JSON writes control characters and lone surrogates as escapes already; U+FFFE and U+FFFF it does not
+  return stringifySource(source)
+    .replace(/[\uFFFE\uFFFF]/g, (c) => '\\u' + c.charCodeAt(0).toString(16))
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /**

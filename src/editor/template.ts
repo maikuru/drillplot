@@ -83,7 +83,7 @@ export const TEMPLATE = `
               <button type="button" class="btn sm" id="sel-later">Later shot</button>
             </div>
           </div>
-          <div class="field" id="g-aim"><label for="sel-aim">Aim: <span id="sel-aim-v"></span> degrees</label><input type="range" id="sel-aim" min="0" max="359" step="5"></div>
+          <div class="field" id="g-aim"><label for="sel-aim">Aim: <span id="sel-aim-v"></span> degrees</label><input type="range" id="sel-aim" min="0" max="359" step="1"></div>
           <div class="row" id="g-zone">
             <div class="field"><label for="sel-w">Width (ft)</label><input type="number" id="sel-w" min="1" max="20" step="0.5"></div>
             <div class="field"><label for="sel-h">Length (ft)</label><input type="number" id="sel-h" min="1" max="44" step="0.5"></div>

@@ -10,7 +10,9 @@ drillplot is a browser tool and a small library. You place players, cones, a bal
 npm install drillplot
 ```
 
-It ships ES modules and TypeScript types. It is not on npm until the first release is published; until then, build from a clone (see [Contributing](#contributing)).
+It ships ES modules and TypeScript types, and needs Node 20 or newer to build and test. To work from a clone instead, see [Contributing](#contributing).
+
+Entry points: `drillplot` (format, validator and renderer, no DOM needed), `drillplot/editor` (registers `<drillplot-editor>` and exports `defineDrillplotEditor`, `DrillplotEditor`, `DrillModel` and `TOKENS`) and `drillplot/schema` (the JSON Schema).
 
 ## Use the renderer
 
@@ -26,7 +28,7 @@ if (result.ok) {
 }
 ```
 
-`renderSvg` is deterministic (the same source gives the same text), uses explicit fills and strokes (no CSS, no `currentColor`), sets a `viewBox`, a `<title>`, a `<desc>` when there is a caption, and puts the source JSON, XML-escaped, in `<metadata>`. It adds no `id` or `class`, so any number of exports can sit in one page. All text from a source (title, caption, labels) is escaped.
+`renderSvg` expects a validated source: pass it `parseSource(...).source` (the editor always does). It is not defensive about other input. Given a validated source it is deterministic (the same source gives the same text), uses explicit fills and strokes (no CSS, no `currentColor`), sets a `viewBox`, a `<title>`, a `<desc>` when there is a caption, and puts the source JSON, XML-escaped, in `<metadata>`. It adds no `id` or `class`, so any number of exports can sit in one page. All text from a source (title, caption, labels) is escaped.
 
 The greyscale option turns every color into its grey, to show what a black and white printer makes of a drawing. It is for display. The editor's Get SVG never uses it, and nothing stores it.
 
@@ -55,10 +57,11 @@ const r = parseText(svgOrJsonText); // reads <metadata>, no DOM needed (works in
 | Member | What it does |
 | --- | --- |
 | `source` property | Get the current source, or load an object, JSON text or an exported SVG. Loading does not fire `change`. |
-| `source` attribute | JSON text to load. |
+| `source` attribute | JSON text (or an exported SVG) to load. |
 | `greyscale` attribute and property | The display-only greyscale view. |
 | `theme` attribute | `light` or `dark`. By default it follows `prefers-color-scheme`. |
 | `save-label` attribute | Text of the Save button. |
+| `defineDrillplotEditor(name)` | Importing `drillplot/editor` registers `<drillplot-editor>`. Call this to register it under another tag name too (a subclass is registered, since a constructor can be registered only once). |
 | `getSvg()`, `getSource()`, `load()` | Export the SVG (always in color), export the source, load and get a parse result back. |
 | `change` event | After every edit. `detail.source` is the source. |
 | `save` event | From the Save button or Ctrl or Cmd + S. `detail.source` and `detail.svg`. |
@@ -70,7 +73,7 @@ The editor has a palette (players A to D and a coach, ball machine, cone, target
 
 ### Theme tokens
 
-Set any of these on `drillplot-editor` or an ancestor:
+Set any of these on `drillplot-editor` or an ancestor (the exported `TOKENS` array lists them, and a test keeps this list and the code in step):
 
 `--drillplot-font`, `--drillplot-surface`, `--drillplot-surface-sunken`, `--drillplot-surface-raised`, `--drillplot-border`, `--drillplot-border-strong`, `--drillplot-text`, `--drillplot-text-muted`, `--drillplot-accent`, `--drillplot-accent-text`, `--drillplot-accent-quiet`, `--drillplot-danger`, `--drillplot-danger-quiet`, `--drillplot-focus`, `--drillplot-stage-bg`, `--drillplot-select`, `--drillplot-radius`, `--drillplot-touch-target`, `--drillplot-stage-height`, `--drillplot-side-width`.
 
@@ -80,7 +83,7 @@ drillplot-editor { --drillplot-accent: #7a1f5c; --drillplot-stage-height: 70vh; 
 
 ## The format
 
-A source is JSON. Positions are court feet: `x` runs 0 to 20 across the court, `y` runs 0 to 44 end line to end line, and the net is at `y = 22`. Items may sit up to 2 feet outside the court lines.
+A source is JSON. Positions are court feet: `x` runs 0 to 20 across the court, `y` runs 0 to 44 end line to end line, and the net is at `y = 22`. A position (the top left corner, for a zone) may sit up to 2 feet outside the court lines.
 
 ```json
 {
@@ -105,26 +108,26 @@ A source is JSON. Positions are court feet: `x` runs 0 to 20 across the court, `
 | `view` | `full`, `half` or `kitchen`. Default `full`. |
 | `side` | `bottom` or `top`, for the half view. Default `bottom`. |
 | `orient` | `portrait` (net across the page) or `landscape` (net up and down). Default `portrait`. |
-| `player` | `x`, `y`, `label` (up to 8 characters), `team`: `orange`, `blue`, `white` or `black`. |
-| `machine` | `x`, `y`, `angle` in degrees, 0 up to 360. |
+| `player` | `x`, `y`; `label` (up to 8 characters); `team`: `orange`, `blue`, `white` or `black` (default `orange`). |
+| `machine` | `x`, `y`; `angle` in degrees, 0 up to (not including) 360, default 0. |
 | `cone` | `x`, `y`. |
-| `zone` | `x`, `y` (top left), `w` 1 to 20, `h` 1 to 44, `label` (up to 24 characters). |
+| `zone` | `x`, `y` (top left), `w` 1 to 20 and `h` 1 to 44 (all required); `label` (up to 24 characters). |
 | `move` | A dashed movement arrow, `x1`, `y1` to `x2`, `y2`. |
-| `ball` | A ball path, `x1`, `y1` to `x2`, `y2`, `curve` (a drop or lob), `bend` (`1` or `-1`, which way it bows) and the shot number `n`, 1 or more. |
+| `ball` | A ball path, `x1`, `y1` to `x2`, `y2`, `curve` (a drop or lob), `bend` (`1` or `-1`, which way it bows) and the shot number `n`, a whole number from 1 to 200 (`n` is required; `curve` defaults to false and `bend` to 1). |
 
-Limits: at most 200 items, a title of 120 characters, a caption of 300. Older team keys still open: `t1` becomes `orange`, `t2` becomes `blue`, `coach` becomes `black`. Unknown properties are dropped.
+Limits: at most 200 items, a title of 120 characters, a caption of 300. Text may not contain control characters, U+FFFE or U+FFFF, or unpaired surrogates (error `bad_character`), because they cannot be written in XML and the exported SVG would not open. A title and labels are one line; a caption may also hold tabs and line breaks. Older team keys still open: `t1` becomes `orange`, `t2` becomes `blue`, `coach` becomes `black`. Unknown properties are dropped.
 
 The four player colors are from the Okabe-Ito set and were chosen to differ in lightness as well as hue, so they stay apart for color-blind viewers and on a black and white printer.
 
 ### Errors
 
-`parseSource` returns `{ ok: false, errors }` where every error is `{ key, path, message }`. The `key` is stable and meant for code to branch on; the message is for people and may be reworded. Keys: `not_json`, `not_an_object`, `wrong_format`, `unsupported_version`, `not_text`, `title_too_long`, `caption_too_long`, `label_too_long`, `bad_view`, `bad_side`, `bad_orient`, `items_not_array`, `too_many_items`, `item_not_object`, `unknown_item_type`, `not_a_number`, `out_of_bounds`, `bad_size`, `bad_angle`, `bad_team`, `bad_bend`, `bad_shot_number`, `not_boolean`, plus `no_svg_source`, `bad_svg_source` and `empty_input` from `parseText`. Markup in a label is not an error: it is text, and the renderer escapes it.
+`parseSource` returns `{ ok: false, errors }` where every error is `{ key, path, message }`. The `key` is stable and meant for code to branch on; the message is for people and may be reworded. Keys: `not_json`, `not_an_object`, `wrong_format`, `unsupported_version`, `not_text`, `title_too_long`, `caption_too_long`, `label_too_long`, `bad_view`, `bad_side`, `bad_orient`, `items_not_array`, `too_many_items`, `item_not_object`, `unknown_item_type`, `not_a_number`, `out_of_bounds`, `bad_size`, `bad_angle`, `bad_team`, `bad_bend`, `bad_shot_number`, `not_boolean`, `bad_character`, plus `no_svg_source`, `bad_svg_source` and `empty_input` from `parseText`. Markup in a label is not an error: it is text, and the renderer escapes it.
 
 ### JSON Schema
 
 [`schema/drill-diagram.v1.schema.json`](schema/drill-diagram.v1.schema.json) is JSON Schema draft 2020-12 and is tested against the validator on a shared set of good and bad samples. It is also exported as `drillplot/schema`.
 
-The schema's `$id` holds a placeholder, `https://<github-user>.github.io/drillplot/schema/drill-diagram.v1.schema.json`. **Replace `<github-user>` with the GitHub account or organization that hosts the repository once it exists** (and fix the one test line in `test/schema.test.ts` that fills it in before compiling). The demo site publishes the schema at that path.
+The schema's `$id` is `https://maikuru.github.io/drillplot/schema/drill-diagram.v1.schema.json`, where the demo site publishes it.
 
 ## Accessibility
 
@@ -145,6 +148,8 @@ npm test
 npm run build
 npm run build:demo   # builds, then copies dist/ and schema/ into demo/ for a local look
 ```
+
+The repository's `.npmrc` sets `legacy-peer-deps`, which the pinned test runner needs with npm 10.
 
 Open `demo/index.html` through any static file server after `build:demo`. Please keep changes small, add a test next to the behavior you change, and add a line to [CHANGELOG.md](CHANGELOG.md). Changes to the format need a schema change, a validator change and a sample in `test/schema.test.ts` that both agree on; a change that older diagrams cannot open needs a new format version.
 

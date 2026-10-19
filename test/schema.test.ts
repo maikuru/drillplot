@@ -4,10 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { LIMITS, parseSource, sampleDrill } from '../src/index.js';
 
 const schema = JSON.parse(readFileSync(new URL('../schema/drill-diagram.v1.schema.json', import.meta.url), 'utf8')) as object;
-// The committed $id holds a <github-user> placeholder, which is not a URL Ajv can resolve.
-// Fill it in the way a maintainer would before compiling.
+// The shipped file, exactly as consumers of `drillplot/schema` get it.
 const ajv = new Ajv2020({ allErrors: true, strict: true });
-const validate = ajv.compile(JSON.parse(JSON.stringify(schema).replace('<github-user>', 'example')) as object);
+const validate = ajv.compile(schema);
 
 const base = { format: 'drill-diagram', version: 1, items: [] };
 const one = (item: unknown) => ({ ...base, items: [item] });
@@ -24,6 +23,9 @@ const samples: Array<[string, unknown, boolean]> = [
   ['edge coordinates', one({ type: 'cone', x: -2, y: 46 }), true],
   ['wide zone', one({ type: 'zone', x: 22, y: 0, w: 20, h: 44, label: long(24) }), true],
   ['machine angle', one({ type: 'machine', x: 1, y: 1, angle: 359.5 }), true],
+  ['angle that rounds up to 360', one({ type: 'machine', x: 1, y: 1, angle: 359.996 }), true],
+  ['highest shot number', one({ ...ball, n: 200 }), true],
+  ['caption with line breaks and tabs', { ...base, caption: 'a\nb\tc\r\n' }, true],
   ['curved ball', one({ ...ball, curve: true, bend: -1 }), true],
   ['astral characters', one({ type: 'player', x: 1, y: 1, label: '🎾'.repeat(8) }), true],
   ['200 items', { ...base, items: Array.from({ length: LIMITS.maxItems }, () => ({ type: 'cone', x: 1, y: 1 })) }, true],
@@ -51,6 +53,16 @@ const samples: Array<[string, unknown, boolean]> = [
   ['unknown team', one({ type: 'player', x: 1, y: 1, team: 'green' }), false],
   ['zone too narrow', one({ type: 'zone', x: 1, y: 1, w: 0.99, h: 3 }), false],
   ['zone too long', one({ type: 'zone', x: 1, y: 1, w: 3, h: 44.5 }), false],
+  ['shot number 201', one({ ...ball, n: 201 }), false],
+  ['title with a control character', { ...base, title: 'a\u0007b' }, false],
+  ['title with a newline', { ...base, title: 'a\nb' }, false],
+  ['caption with a control character', { ...base, caption: 'a\u0001' }, false],
+  ['caption with a null', { ...base, caption: '\u0000' }, false],
+  ['label with a control character', one({ type: 'player', x: 1, y: 1, label: '\u0001' }), false],
+  ['zone label with a lone surrogate', one({ type: 'zone', x: 1, y: 1, w: 3, h: 3, label: '\ud800' }), false],
+  ['title with a lone low surrogate', { ...base, title: 'x\udc00' }, false],
+  ['title with U+FFFF', { ...base, title: '\uffff' }, false],
+  ['title with DEL', { ...base, title: '\u007f' }, false],
   ['angle 360', one({ type: 'machine', x: 1, y: 1, angle: 360 }), false],
   ['negative angle', one({ type: 'machine', x: 1, y: 1, angle: -1 }), false],
   ['bend 0', one({ ...ball, bend: 0 }), false],
@@ -67,7 +79,8 @@ describe('JSON Schema and validator agree', () => {
     expect(parseSource(value).ok).toBe(good);
   });
 
-  it('declares the placeholder $id the README tells you to replace', () => {
-    expect((schema as { $id: string }).$id).toBe('https://<github-user>.github.io/drillplot/schema/drill-diagram.v1.schema.json');
+  it('compiles as shipped, with a real $id', () => {
+    expect((schema as { $id: string }).$id).toBe('https://maikuru.github.io/drillplot/schema/drill-diagram.v1.schema.json');
+    expect(() => new Ajv2020({ strict: true }).compile(schema)).not.toThrow();
   });
 });

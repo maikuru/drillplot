@@ -14,6 +14,14 @@ const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object
 /** Length in code points, which is what JSON Schema's maxLength counts. */
 const len = (s: string): number => [...s].length;
 
+/**
+ * Characters that cannot be written in XML 1.0 (so the exported SVG would not open), other
+ * C0 controls and DEL, and unpaired surrogates. Titles and labels are one line: no control
+ * character at all. The caption may hold tab, newline and carriage return.
+ */
+const BAD_ONE_LINE = /[\u0000-\u001F\u007F\uFFFE\uFFFF\uD800-\uDFFF]/u;
+const BAD_MULTI_LINE = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\uFFFE\uFFFF\uD800-\uDFFF]/u;
+
 const MESSAGES: Record<ErrorKey, string> = {
   not_json: 'That is not valid JSON.',
   not_an_object: 'A drill diagram is a JSON object.',
@@ -23,6 +31,7 @@ const MESSAGES: Record<ErrorKey, string> = {
   title_too_long: `The title is longer than ${LIMITS.titleLength} characters.`,
   caption_too_long: `The caption is longer than ${LIMITS.captionLength} characters.`,
   label_too_long: 'A label is too long.',
+  bad_character: 'Text may not contain control characters or broken Unicode (a caption may have line breaks and tabs).',
   bad_view: 'The view must be "full", "half" or "kitchen".',
   bad_side: 'The side must be "bottom" or "top".',
   bad_orient: 'The orientation must be "portrait" or "landscape".',
@@ -36,7 +45,7 @@ const MESSAGES: Record<ErrorKey, string> = {
   bad_angle: 'The angle must be from 0 up to (not including) 360 degrees.',
   bad_team: 'The player color must be "orange", "blue", "white" or "black".',
   bad_bend: 'The bend must be 1 or -1.',
-  bad_shot_number: 'A shot number must be a whole number, 1 or more.',
+  bad_shot_number: `A shot number must be a whole number from 1 to ${LIMITS.maxShot}.`,
   not_boolean: 'This value must be true or false.',
   no_svg_source: 'That SVG has no diagram source in it. Only SVGs made by drillplot can be reopened.',
   bad_svg_source: 'The source inside that SVG is damaged.',
@@ -66,7 +75,7 @@ function num(c: Collector, v: unknown, path: string, range?: Range, rangeKey: Er
   return round2(v);
 }
 
-function text(c: Collector, v: unknown, path: string, max: number, tooLong: ErrorKey): string {
+function text(c: Collector, v: unknown, path: string, max: number, tooLong: ErrorKey, multiLine = false): string {
   if (v === undefined) return '';
   if (typeof v !== 'string') {
     c.add('not_text', path);
@@ -74,6 +83,10 @@ function text(c: Collector, v: unknown, path: string, max: number, tooLong: Erro
   }
   if (len(v) > max) {
     c.add(tooLong, path);
+    return '';
+  }
+  if ((multiLine ? BAD_MULTI_LINE : BAD_ONE_LINE).test(v)) {
+    c.add('bad_character', path);
     return '';
   }
   return v;
@@ -109,9 +122,15 @@ function item(c: Collector, raw: unknown, path: string): Item | undefined {
     case 'machine': {
       const x = num(c, raw['x'], `${path}/x`, X);
       const y = num(c, raw['y'], `${path}/y`, Y);
-      const a = raw['angle'] === undefined ? 0 : num(c, raw['angle'], `${path}/angle`);
-      if (a !== undefined && (a < 0 || a >= 360)) c.add('bad_angle', `${path}/angle`);
-      out = { type: 'machine', x: x ?? 0, y: y ?? 0, angle: a ?? 0 };
+      // check the range on the value as given, then round: 359.996 is valid and rounds to 360, which is 0
+      let a = 0;
+      const rawAngle = raw['angle'];
+      if (rawAngle !== undefined) {
+        if (typeof rawAngle !== 'number' || !Number.isFinite(rawAngle)) c.add('not_a_number', `${path}/angle`);
+        else if (rawAngle < 0 || rawAngle >= 360) c.add('bad_angle', `${path}/angle`);
+        else a = round2(rawAngle) % 360;
+      }
+      out = { type: 'machine', x: x ?? 0, y: y ?? 0, angle: a };
       break;
     }
     case 'cone': {
@@ -151,7 +170,7 @@ function item(c: Collector, raw: unknown, path: string): Item | undefined {
         else c.add('bad_bend', `${path}/bend`);
       }
       let n = 1;
-      if (typeof raw['n'] === 'number' && Number.isInteger(raw['n']) && raw['n'] >= 1) n = raw['n'];
+      if (typeof raw['n'] === 'number' && Number.isInteger(raw['n']) && raw['n'] >= 1 && raw['n'] <= LIMITS.maxShot) n = raw['n'];
       else c.add('bad_shot_number', `${path}/n`);
       const ball: Ball = { type: 'ball', ...pts, curve, bend, n };
       out = ball;
@@ -184,7 +203,7 @@ export function parseSource(input: unknown): ParseResult {
   if (value['format'] !== FORMAT_NAME) c.add('wrong_format', '/format');
   if (value['format'] === FORMAT_NAME && value['version'] !== FORMAT_VERSION) c.add('unsupported_version', '/version');
   const title = text(c, value['title'], '/title', LIMITS.titleLength, 'title_too_long');
-  const caption = text(c, value['caption'], '/caption', LIMITS.captionLength, 'caption_too_long');
+  const caption = text(c, value['caption'], '/caption', LIMITS.captionLength, 'caption_too_long', true);
   let view: DrillSource['view'] = 'full';
   if (value['view'] !== undefined) {
     if (value['view'] === 'full' || value['view'] === 'half' || value['view'] === 'kitchen') view = value['view'];

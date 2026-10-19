@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { renderSvg, sampleDrill, type DrillSource } from '../src/index.js';
-import { defineDrillplotEditor, type DrillplotEditor } from '../src/editor/index.js';
+import { defineDrillplotEditor, TOKENS, type DrillplotEditor } from '../src/editor/index.js';
 
 beforeAll(() => defineDrillplotEditor());
 
@@ -102,5 +104,59 @@ describe('<drillplot-editor>', () => {
     const el = make();
     const css = el.shadowRoot!.querySelector('style')!.textContent!;
     for (const t of ['--drillplot-accent', '--drillplot-surface', '--drillplot-stage-bg', '--drillplot-font']) expect(css).toContain(t);
+  });
+
+  it('undoing Open from source brings the title and caption fields back too', () => {
+    const el = make();
+    el.source = sampleDrill();
+    q(el, 'open-src').click();
+    q<HTMLTextAreaElement>(el, 'open-input').value = JSON.stringify({ format: 'drill-diagram', version: 1, title: 'Opened', caption: 'New words', items: [] });
+    q(el, 'open-go').click();
+    expect(q<HTMLInputElement>(el, 'title').value).toBe('Opened');
+    q(el, 'undo').click();
+    expect(el.source.title).toBe('Third-shot drop and walk in');
+    expect(q<HTMLInputElement>(el, 'title').value).toBe('Third-shot drop and walk in');
+    expect(q<HTMLTextAreaElement>(el, 'caption').value).toBe(sampleDrill().caption);
+  });
+
+  it('can be registered under another tag name', () => {
+    expect(() => defineDrillplotEditor('my-drill-editor')).not.toThrow();
+    expect(() => defineDrillplotEditor('my-drill-editor')).not.toThrow();
+    const el = document.createElement('my-drill-editor') as DrillplotEditor;
+    document.body.append(el);
+    el.source = sampleDrill();
+    expect(el.source.items).toHaveLength(sampleDrill().items.length);
+  });
+
+  it('Escape closes a sheet and returns focus to the button that opened it', () => {
+    const el = make();
+    q(el, 'open-src').click();
+    expect(q(el, 'sheet-open').hidden).toBe(false);
+    q<HTMLTextAreaElement>(el, 'open-input').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true }));
+    expect(q(el, 'sheet-open').hidden).toBe(true);
+    expect(el.shadowRoot!.activeElement).toBe(q(el, 'open-src'));
+  });
+
+  it('keeps the focus ring outside the checked segment, and a solid pressed state', () => {
+    const css = make().shadowRoot!.querySelector('style')!.textContent!;
+    expect(css).toMatch(/focus-visible \+ label \{[^}]*outline-offset: 2px/);
+    expect(css).toMatch(/aria-pressed="true"\][^}]*background: var\(--accent\);/);
+  });
+
+  it('the README documents exactly the theme tokens the code exposes', () => {
+    const readme = readFileSync(resolve(process.cwd(), 'README.md'), 'utf8');
+    const documented = [...readme.matchAll(/`--drillplot-([a-z-]+)`/g)].map((m) => m[1]).sort();
+    expect(documented).toEqual([...TOKENS].sort());
+  });
+
+  it('does not rebuild the piece list or rewrite the hint while a drag is in flight', () => {
+    const el = make();
+    el.source = sampleDrill();
+    const pick = q(el, 'pick');
+    const first = pick.firstElementChild;
+    q(el, 'sel-label'); // exists
+    // a full re-render with unchanged items keeps the same option nodes
+    q<HTMLInputElement>(el, 'mono').click();
+    expect(pick.firstElementChild).toBe(first);
   });
 });

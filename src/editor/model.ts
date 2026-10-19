@@ -191,7 +191,7 @@ export class DrillModel {
     const base = { id: this.uid(), x1: clampX(x1), y1: clampY(y1), x2: clampX(x2), y2: clampY(y2) };
     return tool === 'move'
       ? { type: 'move', ...base }
-      : { type: 'ball', ...base, curve: tool === 'drop', bend: 1, n: nextShotNumber(this.items) };
+      : { type: 'ball', ...base, curve: tool === 'drop', bend: 1, n: Math.min(nextShotNumber(this.items), LIMITS.maxShot) };
   }
 
   /** Swaps the shot number with the neighbouring shot. */

@@ -68,7 +68,7 @@ export class DrillplotEditor extends HTMLElement {
   private mono = false;
   private drag: Drag | null = null;
   private quiet = 0;
-  private opener: HTMLElement | null = null;
+  private pickHtml = '';
   private labelBefore: ReturnType<DrillModel['snap']> | null = null;
   private aimBefore: ReturnType<DrillModel['snap']> | null = null;
   private readonly shadow: ShadowRoot;
@@ -180,7 +180,8 @@ export class DrillplotEditor extends HTMLElement {
 
   /* ---------- render ---------- */
 
-  private render(): void {
+  /** `full` false redraws only the court: used while a drag is in flight, so panels and live regions are not rewritten on every pointer move. */
+  private render(full = true): void {
     const m = this.model;
     const v = viewBox(m.meta.view, m.meta.side, m.meta.orient);
     const ctx = { orient: m.meta.orient, greyscale: this.mono };
@@ -194,7 +195,7 @@ export class DrillplotEditor extends HTMLElement {
         .join('') +
       `<g>${this.overlay()}</g></g>`;
     this.stage.classList.toggle('drawing', this.tool !== 'select' || !!this.armed);
-    this.syncUI();
+    if (full) this.syncUI();
   }
 
   private hit(it: Item): string {
@@ -230,6 +231,11 @@ export class DrillplotEditor extends HTMLElement {
     if (this.shadow.activeElement !== el) el.value = String(val);
   }
 
+  private setText(id: string, text: string): void {
+    const el = this.$(id);
+    if (el.textContent !== text) el.textContent = text;
+  }
+
   private syncUI(): void {
     const m = this.model;
     const it = m.byId(this.sel);
@@ -247,17 +253,16 @@ export class DrillplotEditor extends HTMLElement {
     half.options[1]!.textContent = this.landscape ? 'Left half' : 'Top half';
 
     const off = countOffView({ view: meta.view, side: meta.side, items: m.items });
-    this.$('offview').textContent = off ? `${off} piece${off === 1 ? ' is' : 's are'} outside this view` : '';
-    this.$('scale').textContent =
-      meta.view === 'full'
+    this.setText('offview', off ? `${off} piece${off === 1 ? ' is' : 's are'} outside this view` : '');
+    this.setText('scale', meta.view === 'full'
         ? 'Drawn to scale: the court is 20 by 44 feet.'
         : meta.view === 'half'
           ? 'Drawn to scale: one half, 20 by 22 feet.'
-          : 'Drawn to scale: both kitchens (7 feet each) and the net.';
+          : 'Drawn to scale: both kitchens (7 feet each) and the net.');
 
     this.all('[data-tool]').forEach((b) => b.setAttribute('aria-pressed', String(!this.armed && b.dataset['tool'] === this.tool)));
     this.all('[data-kind]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset['kind'] === this.armed)));
-    this.$('hint').textContent = this.armed
+    this.setText('hint', this.armed
       ? `Tap or click the court to place ${KIND_NAME[this.armed]}. You can also drag it there.`
       : this.tool === 'drive'
         ? 'Drag on the court from where the ball is hit to where it lands. A straight line, numbered in shot order.'
@@ -265,19 +270,25 @@ export class DrillplotEditor extends HTMLElement {
           ? 'Drag on the court from the hit to the landing spot. The arrow curves, like a drop or a lob.'
           : this.tool === 'move'
             ? 'Drag to show where a player moves. Dashed arrow.'
-            : 'Drag a piece to move it. Drag the white handles to reshape an arrow or resize a zone. Drag a button above onto the court to add a piece.';
+            : 'Drag a piece to move it. Drag the white handles to reshape an arrow or resize a zone. Drag a button above onto the court to add a piece.');
 
     const pick = this.$('pick') as HTMLSelectElement;
-    pick.innerHTML =
+    const pickHtml =
       `<option value="">${m.items.length ? 'Choose a piece' : 'Nothing on the court yet'}</option>` +
       drawOrder(m.items)
         .map((i) => `<option value="${i.id}">${esc(itemName(i))}</option>`)
         .join('');
+    if (pickHtml !== this.pickHtml) {
+      this.pickHtml = pickHtml;
+      pick.innerHTML = pickHtml;
+    }
     pick.value = this.sel ?? '';
+    this.setIfIdle('title', m.meta.title);
+    this.setIfIdle('caption', m.meta.caption);
 
     this.$('insp').hidden = !it;
     if (it) {
-      this.$('insp-name').textContent = itemName(it);
+      this.setText('insp-name', itemName(it));
       this.$('g-label').hidden = !(it.type === 'player' || it.type === 'zone');
       this.$('sel-label-l').textContent = it.type === 'zone' ? 'Zone label (optional)' : 'Label';
       this.input('sel-label').maxLength = it.type === 'zone' ? LIMITS.zoneLabelLength : LIMITS.playerLabelLength;
@@ -310,11 +321,11 @@ export class DrillplotEditor extends HTMLElement {
     }
 
     const balls = ballItems(m.items);
-    this.$('shots-note').textContent = !balls.length
+    this.setText('shots-note', !balls.length
       ? 'No ball paths yet. Each new one gets the next number.'
       : hasShotGap(m.items)
         ? 'Numbers skip a shot. Renumber to close the gap.'
-        : `${balls.length} shot${balls.length === 1 ? '' : 's'}, numbered 1 to ${balls.length}.`;
+        : `${balls.length} shot${balls.length === 1 ? '' : 's'}, numbered 1 to ${balls.length}.`);
     (this.$('renumber') as HTMLButtonElement).disabled = !balls.length;
   }
 
@@ -389,6 +400,13 @@ export class DrillplotEditor extends HTMLElement {
     return first.join(' ') + (more > 0 ? ` And ${more} more.` : '');
   }
 
+  /** Closes the open sheet and puts focus back on the button that opened it. */
+  private closeSheet(): void {
+    const opener = this.$('sheet-svg').hidden ? 'open-src' : 'open-svg';
+    this.showSheet(null);
+    this.$(opener).focus();
+  }
+
   private sheetOpen(): boolean {
     return !this.$('sheet-svg').hidden || !this.$('sheet-open').hidden;
   }
@@ -456,7 +474,7 @@ export class DrillplotEditor extends HTMLElement {
         it.w = round2(clamp(snapFt(p.x - it.x), LIMITS.zoneWidth.min, Math.min(LIMITS.zoneWidth.max, 22 - it.x)));
         it.h = round2(clamp(snapFt(p.y - it.y), LIMITS.zoneHeight.min, Math.min(LIMITS.zoneHeight.max, 46 - it.y)));
       }
-      this.render();
+      this.render(false);
     });
     const endDrag = (): void => {
       const d = this.drag;
@@ -688,15 +706,11 @@ export class DrillplotEditor extends HTMLElement {
     this.$('renumber').addEventListener('click', () => m.renumber());
 
     /* sheets */
-    const back = (id: string, opener: string) =>
-      this.$(id).addEventListener('click', () => {
-        this.showSheet(null);
-        this.$(opener).focus();
-      });
+    const back = (id: string) => this.$(id).addEventListener('click', () => this.closeSheet());
     this.$('open-svg').addEventListener('click', () => this.showSheet('svg'));
     this.$('open-src').addEventListener('click', () => this.showSheet('open'));
-    back('sheet-svg-back', 'open-svg');
-    back('sheet-open-back', 'open-src');
+    back('sheet-svg-back');
+    back('sheet-open-back');
     this.$('copy-svg').addEventListener('click', () => void this.copy((this.$('out-svg') as HTMLTextAreaElement).value, this.$('out-svg') as HTMLTextAreaElement, this.$('copy-svg-s')));
     this.$('copy-json').addEventListener('click', () => void this.copy((this.$('out-json') as HTMLTextAreaElement).value, this.$('out-json') as HTMLTextAreaElement, this.$('copy-json-s')));
     this.$('open-go').addEventListener('click', () => {
@@ -731,7 +745,7 @@ export class DrillplotEditor extends HTMLElement {
       }
       if (e.key === 'Escape') {
         if (this.sheetOpen()) {
-          this.showSheet(null);
+          this.closeSheet();
           return;
         }
         if (!this.$('clear-confirm').hidden) {

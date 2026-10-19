@@ -86,7 +86,31 @@ describe('renderSvg properties', () => {
   });
 });
 
+describe('renderSvg robustness', () => {
+  it('drops characters XML cannot carry, if one ever reaches it', () => {
+    const src = { ...sampleDrill(), title: 'a\u0007b\ud800c', items: [{ type: 'player', x: 1, y: 1, label: '\u0001A', team: 'blue' }] } as DrillSource;
+    const svg = renderSvg(src);
+    // eslint-disable-next-line no-control-regex
+    expect(svg.slice(0, svg.indexOf('<metadata>'))).not.toMatch(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\ud800]/);
+    expect(svg).toContain('<title>abc</title>');
+  });
+
+  it('writes the shot number as a whole number whatever it was given', () => {
+    const ball = (n: unknown) => ({ type: 'ball', x1: 1, y1: 1, x2: 5, y2: 5, curve: false, bend: 1, n }) as DrillSource['items'][number];
+    const svg = renderSvg({ ...sampleDrill(), items: [ball('<script>'), ball(2.7)] });
+    expect(svg).not.toContain('<script>');
+    expect(svg).toMatch(/>1<\/text>/);
+    expect(svg).toMatch(/>2<\/text>/);
+  });
+});
+
 describe('open from SVG', () => {
+  it('ignores a metadata element inside a comment', () => {
+    const real = renderSvg(sampleDrill());
+    const decoy = real.replace('<title>', '<!-- <metadata>{"format":"drill-diagram"}</metadata> -->\n<title>');
+    expect(parseText(decoy)).toEqual({ ok: true, source: sampleDrill() });
+  });
+
   it('reads the source back out of an exported SVG', () => {
     const src = sampleDrill();
     const r = parseText(renderSvg(src));

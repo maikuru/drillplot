@@ -60,6 +60,14 @@ describe('labels are text', () => {
 
 const long = (n: number) => 'x'.repeat(n);
 const refusals: Array<[ErrorKey, string, unknown]> = [
+  ['bad_character', '/title', { ...base, title: 'a\u0007' }],
+  ['bad_character', '/title', { ...base, title: 'two\nlines' }],
+  ['bad_character', '/caption', { ...base, caption: '\u0000' }],
+  ['bad_character', '/caption', { ...base, caption: 'x\ud83d' }],
+  ['bad_character', '/items/0/label', withItem({ type: 'player', x: 1, y: 1, label: '\u001b' })],
+  ['bad_character', '/items/0/label', withItem({ type: 'zone', x: 1, y: 1, w: 2, h: 2, label: '\uffff' })],
+  ['bad_angle', '/items/0/angle', withItem({ type: 'machine', x: 1, y: 1, angle: -0.001 })],
+  ['bad_shot_number', '/items/0/n', withItem({ type: 'ball', x1: 1, y1: 1, x2: 2, y2: 2, n: 201 })],
   ['not_json', '', '{nope'],
   ['not_an_object', '', [1]],
   ['not_an_object', '', null],
@@ -120,6 +128,21 @@ describe('validation refusals', () => {
 
   it('counts characters, not UTF-16 units', () => {
     expect(validateSource(withItem({ type: 'player', x: 1, y: 1, label: '🎾'.repeat(8) }))).toEqual([]);
+  });
+});
+
+describe('text and angles', () => {
+  it('a caption may hold tabs and line breaks; title and labels may not', () => {
+    expect(validateSource({ ...base, caption: 'one\n\ttwo\r\nthree' })).toEqual([]);
+    expect(validateSource({ ...base, title: 'one\ttwo' }).map((e) => e.key)).toEqual(['bad_character']);
+  });
+  it('accepts a well-formed astral pair, rejects half of one', () => {
+    expect(validateSource({ ...base, title: '\u{1F3BE}' })).toEqual([]);
+    expect(validateSource({ ...base, title: '\ud83c' }).map((e) => e.key)).toEqual(['bad_character']);
+  });
+  it('an angle that rounds up to 360 is accepted as 0', () => {
+    const r = parseSource(withItem({ type: 'machine', x: 1, y: 1, angle: 359.996 }));
+    expect(r.ok && r.source.items[0]).toMatchObject({ angle: 0 });
   });
 });
 

@@ -38,8 +38,14 @@ export const PLAYER_PALETTE: Record<PlayerColor, readonly [string, string, strin
   black: ['#1a1a1a', '#ffffff', '#ffffff'],
 };
 
+/** Characters XML cannot carry (control characters, U+FFFE and U+FFFF, unpaired surrogates). */
+const XML_ILLEGAL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF\uD800-\uDFFF]/gu;
+
+/** Escapes text for XML, dropping any character XML cannot carry. */
 export const esc = (s: string): string =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  String(s)
+    .replace(XML_ILLEGAL, '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 /** Luma of an sRGB hex color, as a grey hex (same weights as the CSS grayscale() filter). */
 export function toGrey(hex: string): string {
@@ -98,7 +104,7 @@ export function itemMarkup(it: Item, ctx: MarkupContext): string {
         `<rect x="-1.1" y="-0.9" width="2.2" height="1.9" rx="0.3" fill="${c(COLOR.machine)}" stroke="${c(COLOR.outline)}" stroke-width="0.12"/><circle cx="0" cy="0.1" r="0.6" fill="${c(COLOR.ball)}"/></g>`
       );
     case 'player': {
-      const f = PLAYER_PALETTE[it.team];
+      const f = PLAYER_PALETTE[it.team] ?? PLAYER_PALETTE.orange;
       const n = [...it.label].length;
       const fs = n <= 1 ? 1.5 : n === 2 ? 1.15 : n === 3 ? 0.9 : 0.68;
       return (
@@ -115,7 +121,7 @@ export function itemMarkup(it: Item, ctx: MarkupContext): string {
       return (
         `<path d="${g.d}" fill="none" stroke="${c(COLOR.ball)}" stroke-width="0.3" stroke-linecap="round"/><polygon points="${g.poly}" fill="${c(COLOR.ball)}"/>` +
         `<circle cx="${round2(g.mx)}" cy="${round2(g.my)}" r="0.85" fill="${c(COLOR.badge)}" stroke="${c(COLOR.ball)}" stroke-width="0.12"/>` +
-        `<text x="${round2(g.mx)}" y="${round2(g.my)}" dy="0.35em" font-size="1.1" font-weight="700" fill="${c(COLOR.ball)}" text-anchor="middle" font-family="${FONT}"${up(g.mx, g.my)}>${it.n}</text>`
+        `<text x="${round2(g.mx)}" y="${round2(g.my)}" dy="0.35em" font-size="1.1" font-weight="700" fill="${c(COLOR.ball)}" text-anchor="middle" font-family="${FONT}"${up(g.mx, g.my)}>${Math.trunc(Number(it.n)) || 1}</text>`
       );
     }
   }

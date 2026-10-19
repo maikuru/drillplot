@@ -79,6 +79,7 @@ export type ErrorKey =
   | 'title_too_long'
   | 'caption_too_long'
   | 'label_too_long'
+  | 'bad_character'
   | 'bad_view'
   | 'bad_side'
   | 'bad_orient'

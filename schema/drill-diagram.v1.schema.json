@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://<github-user>.github.io/drillplot/schema/drill-diagram.v1.schema.json",
+  "$id": "https://maikuru.github.io/drillplot/schema/drill-diagram.v1.schema.json",
   "title": "drillplot drill diagram, format 1",
   "description": "The editable source of a pickleball drill diagram. Positions are court feet: x 0 to 20 across, y 0 to 44 along, the net at y = 22. Items may sit up to 2 feet outside the court lines. Unknown properties are ignored by the reader and dropped on save.",
   "type": "object",
@@ -8,8 +8,8 @@
   "properties": {
     "format": { "const": "drill-diagram" },
     "version": { "const": 1 },
-    "title": { "type": "string", "maxLength": 120 },
-    "caption": { "type": "string", "maxLength": 300 },
+    "title": { "$ref": "#/$defs/line", "type": "string", "maxLength": 120 },
+    "caption": { "$ref": "#/$defs/text", "type": "string", "maxLength": 300 },
     "view": { "enum": ["full", "half", "kitchen"], "default": "full" },
     "side": { "enum": ["bottom", "top"], "default": "bottom", "description": "Which half to show when view is half." },
     "orient": { "enum": ["portrait", "landscape"], "default": "portrait" },
@@ -29,6 +29,16 @@
     }
   },
   "$defs": {
+    "line": {
+      "description": "One line of text: no control characters, no U+FFFE or U+FFFF, no unpaired surrogates.",
+      "type": "string",
+      "pattern": "^[^\\u0000-\\u001F\\u007F\\uFFFE\\uFFFF\\uD800-\\uDFFF]*$"
+    },
+    "text": {
+      "description": "Text that may hold tab, newline and carriage return, but no other control character, no U+FFFE or U+FFFF, no unpaired surrogates.",
+      "type": "string",
+      "pattern": "^[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F\\uFFFE\\uFFFF\\uD800-\\uDFFF]*$"
+    },
     "x": { "type": "number", "minimum": -2, "maximum": 22 },
     "y": { "type": "number", "minimum": -2, "maximum": 46 },
     "team": {
@@ -42,7 +52,7 @@
         "type": { "const": "player" },
         "x": { "$ref": "#/$defs/x" },
         "y": { "$ref": "#/$defs/y" },
-        "label": { "type": "string", "maxLength": 8 },
+        "label": { "$ref": "#/$defs/line", "type": "string", "maxLength": 8 },
         "team": { "$ref": "#/$defs/team", "default": "orange" }
       }
     },
@@ -74,7 +84,7 @@
         "y": { "$ref": "#/$defs/y" },
         "w": { "type": "number", "minimum": 1, "maximum": 20 },
         "h": { "type": "number", "minimum": 1, "maximum": 44 },
-        "label": { "type": "string", "maxLength": 24 }
+        "label": { "$ref": "#/$defs/line", "type": "string", "maxLength": 24 }
       }
     },
     "move": {
@@ -99,7 +109,7 @@
         "y2": { "$ref": "#/$defs/y" },
         "curve": { "type": "boolean", "default": false },
         "bend": { "enum": [1, -1], "default": 1 },
-        "n": { "type": "integer", "minimum": 1, "description": "Shot number." }
+        "n": { "type": "integer", "minimum": 1, "maximum": 200, "description": "Shot number." }
       }
     }
   }
