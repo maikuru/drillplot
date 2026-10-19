@@ -1,0 +1,29 @@
+name: Bug report
+description: Something draws, exports or opens wrongly
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: The diagram source
+      description: Paste the JSON source (Copy source in the editor) if the problem is in a drawing.
+      render: json
+  - type: input
+    id: version
+    attributes:
+      label: drillplot version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Safari 18 on iPad

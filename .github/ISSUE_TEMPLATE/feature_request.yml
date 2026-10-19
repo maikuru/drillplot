@@ -1,0 +1,14 @@
+name: Feature request
+description: A piece, a view or an export that would help you draw drills
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What you are trying to draw or do
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How you picture it working
