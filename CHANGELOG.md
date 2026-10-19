@@ -4,6 +4,8 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-19
+
 ### Added
 
 - Documentation: a restructured README with badges, a quick start for the renderer, the editor, React and Vue, the editor reference (attributes, properties, events, keyboard, theming, parts) and validation; [docs/format.md](docs/format.md), the format as a specification; [docs/api.md](docs/api.md), every export of `drillplot`, `drillplot/editor` and `drillplot/schema`; a sample SVG under `docs/`.
@@ -56,5 +58,6 @@ All notable changes to this project are recorded here. The format follows [Keep 
 - Every action can be done without a pointer: exact coordinate fields for the selected piece, and Enter adds an arrow when an arrow tool is chosen.
 - Unknown team keys and out-of-range values are refused with a message instead of being silently replaced.
 
-[Unreleased]: https://github.com/maikuru/drillplot/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/maikuru/drillplot/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/maikuru/drillplot/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/maikuru/drillplot/releases/tag/v0.1.0
