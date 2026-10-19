@@ -4,6 +4,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Wait two weeks after a release before proposing it.
+    cooldown:
+      default-days: 14
     open-pull-requests-limit: 5
     groups:
       dev-dependencies:
@@ -13,6 +16,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Wait two weeks after a release before proposing it.
+    cooldown:
+      default-days: 14
     groups:
       actions:
         patterns: ['*']
