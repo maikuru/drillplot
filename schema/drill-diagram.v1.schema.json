@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://<github-user>.github.io/drillplot/schema/drill-diagram.v1.schema.json",
+  "title": "drillplot drill diagram, format 1",
+  "description": "The editable source of a pickleball drill diagram. Positions are court feet: x 0 to 20 across, y 0 to 44 along, the net at y = 22. Items may sit up to 2 feet outside the court lines. Unknown properties are ignored by the reader and dropped on save.",
+  "type": "object",
+  "required": ["format", "version", "items"],
+  "properties": {
+    "format": { "const": "drill-diagram" },
+    "version": { "const": 1 },
+    "title": { "type": "string", "maxLength": 120 },
+    "caption": { "type": "string", "maxLength": 300 },
+    "view": { "enum": ["full", "half", "kitchen"], "default": "full" },
+    "side": { "enum": ["bottom", "top"], "default": "bottom", "description": "Which half to show when view is half." },
+    "orient": { "enum": ["portrait", "landscape"], "default": "portrait" },
+    "items": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/player" },
+          { "$ref": "#/$defs/machine" },
+          { "$ref": "#/$defs/cone" },
+          { "$ref": "#/$defs/zone" },
+          { "$ref": "#/$defs/move" },
+          { "$ref": "#/$defs/ball" }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "x": { "type": "number", "minimum": -2, "maximum": 22 },
+    "y": { "type": "number", "minimum": -2, "maximum": 46 },
+    "team": {
+      "description": "Okabe-Ito player colors. t1, t2 and coach are older keys that read as orange, blue and black.",
+      "enum": ["orange", "blue", "white", "black", "t1", "t2", "coach"]
+    },
+    "player": {
+      "type": "object",
+      "required": ["type", "x", "y"],
+      "properties": {
+        "type": { "const": "player" },
+        "x": { "$ref": "#/$defs/x" },
+        "y": { "$ref": "#/$defs/y" },
+        "label": { "type": "string", "maxLength": 8 },
+        "team": { "$ref": "#/$defs/team", "default": "orange" }
+      }
+    },
+    "machine": {
+      "type": "object",
+      "required": ["type", "x", "y"],
+      "properties": {
+        "type": { "const": "machine" },
+        "x": { "$ref": "#/$defs/x" },
+        "y": { "$ref": "#/$defs/y" },
+        "angle": { "type": "number", "minimum": 0, "exclusiveMaximum": 360, "default": 0 }
+      }
+    },
+    "cone": {
+      "type": "object",
+      "required": ["type", "x", "y"],
+      "properties": {
+        "type": { "const": "cone" },
+        "x": { "$ref": "#/$defs/x" },
+        "y": { "$ref": "#/$defs/y" }
+      }
+    },
+    "zone": {
+      "type": "object",
+      "required": ["type", "x", "y", "w", "h"],
+      "properties": {
+        "type": { "const": "zone" },
+        "x": { "$ref": "#/$defs/x" },
+        "y": { "$ref": "#/$defs/y" },
+        "w": { "type": "number", "minimum": 1, "maximum": 20 },
+        "h": { "type": "number", "minimum": 1, "maximum": 44 },
+        "label": { "type": "string", "maxLength": 24 }
+      }
+    },
+    "move": {
+      "type": "object",
+      "required": ["type", "x1", "y1", "x2", "y2"],
+      "properties": {
+        "type": { "const": "move" },
+        "x1": { "$ref": "#/$defs/x" },
+        "y1": { "$ref": "#/$defs/y" },
+        "x2": { "$ref": "#/$defs/x" },
+        "y2": { "$ref": "#/$defs/y" }
+      }
+    },
+    "ball": {
+      "type": "object",
+      "required": ["type", "x1", "y1", "x2", "y2", "n"],
+      "properties": {
+        "type": { "const": "ball" },
+        "x1": { "$ref": "#/$defs/x" },
+        "y1": { "$ref": "#/$defs/y" },
+        "x2": { "$ref": "#/$defs/x" },
+        "y2": { "$ref": "#/$defs/y" },
+        "curve": { "type": "boolean", "default": false },
+        "bend": { "enum": [1, -1], "default": 1 },
+        "n": { "type": "integer", "minimum": 1, "description": "Shot number." }
+      }
+    }
+  }
+}

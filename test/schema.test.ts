@@ -1,0 +1,73 @@
+import { readFileSync } from 'node:fs';
+import Ajv2020 from 'ajv/dist/2020.js';
+import { describe, expect, it } from 'vitest';
+import { LIMITS, parseSource, sampleDrill } from '../src/index.js';
+
+const schema = JSON.parse(readFileSync(new URL('../schema/drill-diagram.v1.schema.json', import.meta.url), 'utf8')) as object;
+// The committed $id holds a <github-user> placeholder, which is not a URL Ajv can resolve.
+// Fill it in the way a maintainer would before compiling.
+const ajv = new Ajv2020({ allErrors: true, strict: true });
+const validate = ajv.compile(JSON.parse(JSON.stringify(schema).replace('<github-user>', 'example')) as object);
+
+const base = { format: 'drill-diagram', version: 1, items: [] };
+const one = (item: unknown) => ({ ...base, items: [item] });
+const long = (n: number) => 'x'.repeat(n);
+const ball = { type: 'ball', x1: 1, y1: 1, x2: 2, y2: 2, n: 1 };
+
+const samples: Array<[string, unknown, boolean]> = [
+  ['the sample', sampleDrill(), true],
+  ['minimal', base, true],
+  ['full header', { ...base, title: 't', caption: 'c', view: 'half', side: 'top', orient: 'landscape' }, true],
+  ['older team key t1', one({ type: 'player', x: 1, y: 1, label: 'A', team: 't1' }), true],
+  ['older team key coach', one({ type: 'player', x: 1, y: 1, team: 'coach' }), true],
+  ['old export with ids', one({ id: 'i3', type: 'cone', x: 1, y: 1 }), true],
+  ['edge coordinates', one({ type: 'cone', x: -2, y: 46 }), true],
+  ['wide zone', one({ type: 'zone', x: 22, y: 0, w: 20, h: 44, label: long(24) }), true],
+  ['machine angle', one({ type: 'machine', x: 1, y: 1, angle: 359.5 }), true],
+  ['curved ball', one({ ...ball, curve: true, bend: -1 }), true],
+  ['astral characters', one({ type: 'player', x: 1, y: 1, label: '🎾'.repeat(8) }), true],
+  ['200 items', { ...base, items: Array.from({ length: LIMITS.maxItems }, () => ({ type: 'cone', x: 1, y: 1 })) }, true],
+
+  ['not an object', [1], false],
+  ['wrong format', { ...base, format: 'x' }, false],
+  ['future version', { ...base, version: 2 }, false],
+  ['no items', { format: 'drill-diagram', version: 1 }, false],
+  ['items not a list', { ...base, items: 5 }, false],
+  ['bad view', { ...base, view: 'wide' }, false],
+  ['bad side', { ...base, side: 'left' }, false],
+  ['bad orient', { ...base, orient: 'x' }, false],
+  ['title not text', { ...base, title: 4 }, false],
+  ['title too long', { ...base, title: long(121) }, false],
+  ['caption too long', { ...base, caption: long(301) }, false],
+  ['201 items', { ...base, items: Array.from({ length: LIMITS.maxItems + 1 }, () => ({ type: 'cone', x: 1, y: 1 })) }, false],
+  ['item not an object', one('cone'), false],
+  ['unknown type', one({ type: 'net', x: 1, y: 1 }), false],
+  ['x as text', one({ type: 'cone', x: '1', y: 1 }), false],
+  ['missing y', one({ type: 'cone', x: 1 }), false],
+  ['x past margin', one({ type: 'cone', x: 22.01, y: 1 }), false],
+  ['y past margin', one({ type: 'cone', x: 1, y: -2.01 }), false],
+  ['player label too long', one({ type: 'player', x: 1, y: 1, label: long(9) }), false],
+  ['zone label too long', one({ type: 'zone', x: 1, y: 1, w: 3, h: 3, label: long(25) }), false],
+  ['unknown team', one({ type: 'player', x: 1, y: 1, team: 'green' }), false],
+  ['zone too narrow', one({ type: 'zone', x: 1, y: 1, w: 0.99, h: 3 }), false],
+  ['zone too long', one({ type: 'zone', x: 1, y: 1, w: 3, h: 44.5 }), false],
+  ['angle 360', one({ type: 'machine', x: 1, y: 1, angle: 360 }), false],
+  ['negative angle', one({ type: 'machine', x: 1, y: 1, angle: -1 }), false],
+  ['bend 0', one({ ...ball, bend: 0 }), false],
+  ['curve as text', one({ ...ball, curve: 'yes' }), false],
+  ['shot 0', one({ ...ball, n: 0 }), false],
+  ['shot 1.5', one({ ...ball, n: 1.5 }), false],
+  ['no shot number', one({ type: 'ball', x1: 1, y1: 1, x2: 2, y2: 2 }), false],
+  ['move missing end', one({ type: 'move', x1: 1, y1: 1, x2: 2 }), false],
+];
+
+describe('JSON Schema and validator agree', () => {
+  it.each(samples)('%s', (_name, value, good) => {
+    expect(validate(value)).toBe(good);
+    expect(parseSource(value).ok).toBe(good);
+  });
+
+  it('declares the placeholder $id the README tells you to replace', () => {
+    expect((schema as { $id: string }).$id).toBe('https://<github-user>.github.io/drillplot/schema/drill-diagram.v1.schema.json');
+  });
+});

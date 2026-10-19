@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>drillplot: draw pickleball drill diagrams</title>
+<meta name="description" content="Draw pickleball drill diagrams on a to-scale court and export editable SVG.">
+<style>
+  :root { color-scheme: light dark; --bg: #f3f3ef; --fg: #16191d; --muted: #5b6169; --card: #fff; --line: #d8dbe0; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #101316; --fg: #eef0f2; --muted: #a3aab3; --card: #16191d; --line: #2f343b; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 72rem; margin: 0 auto; padding: 1rem max(16px, env(safe-area-inset-right)) 3rem max(16px, env(safe-area-inset-left)); }
+  h1 { margin: .5rem 0 0; font-size: 2rem; }
+  h2 { font-size: 1.2rem; margin: 2rem 0 .5rem; }
+  p.lede { color: var(--muted); margin: .25rem 0 1rem; max-width: 46rem; }
+  a { color: inherit; }
+  pre, code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .85rem; }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: .75rem; overflow: auto; max-height: 16rem; }
+  .row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: .5rem 0; }
+  button { min-height: 40px; padding: 0 .9rem; border-radius: 6px; border: 1px solid var(--line); background: var(--card); color: inherit; font: inherit; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #1e4d8c; outline-offset: 2px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+  figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: .5rem; }
+  figure svg { width: 100%; height: auto; max-height: 28rem; display: block; }
+  figcaption { color: var(--muted); font-size: .9rem; padding-top: .25rem; }
+  /* Restyling the editor from the host page: these are the public tokens. */
+  drillplot-editor { --drillplot-radius: 8px; }
+  #log { max-height: 8rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>drillplot</h1>
+  <p class="lede">Draw pickleball drill diagrams on a to-scale court and export SVG that carries its own editable source. Add players, cones, a ball machine and target zones, then draw numbered drives, drops and movement arrows.</p>
+
+  <drillplot-editor id="editor" save-label="Save"></drillplot-editor>
+
+  <h2>Events</h2>
+  <p class="lede">The editor fires <code>change</code> on every edit and <code>save</code> from its Save button (or Ctrl or Cmd + S).</p>
+  <div class="row"><button id="sample" type="button">Load the sample drill</button><button id="theme" type="button">Switch theme</button></div>
+  <pre id="log" aria-live="polite">Nothing yet.</pre>
+
+  <h2>The renderer on its own</h2>
+  <p class="lede">The same source, drawn with <code>renderSvg()</code> and no editor: color, then the greyscale view (display only; exports keep their colors).</p>
+  <div class="grid">
+    <figure id="r-color"></figure>
+    <figure id="r-grey"></figure>
+  </div>
+</main>
+
+<script type="module">
+  import { renderSvg, sampleDrill } from './dist/index.js';
+  import './dist/editor.js';
+
+  const editor = document.getElementById('editor');
+  const log = document.getElementById('log');
+  const note = (line) => { log.textContent = line + '\n' + (log.textContent === 'Nothing yet.' ? '' : log.textContent); };
+
+  const draw = (source) => {
+    document.getElementById('r-color').innerHTML = renderSvg(source) + '<figcaption>renderSvg(source)</figcaption>';
+    document.getElementById('r-grey').innerHTML = renderSvg(source, { greyscale: true }) + '<figcaption>renderSvg(source, { greyscale: true })</figcaption>';
+  };
+
+  editor.source = sampleDrill();
+  draw(editor.source);
+
+  editor.addEventListener('change', (e) => { draw(e.detail.source); note(`change: ${e.detail.source.items.length} items`); });
+  editor.addEventListener('save', (e) => note(`save: "${e.detail.source.title}", ${e.detail.svg.length} characters of SVG`));
+  editor.addEventListener('source-error', (e) => note('source-error: ' + e.detail.errors.map((x) => x.key).join(', ')));
+  document.getElementById('sample').addEventListener('click', () => { editor.source = sampleDrill(); draw(editor.source); note('loaded the sample'); });
+  document.getElementById('theme').addEventListener('click', () => {
+    const next = editor.getAttribute('theme') === 'dark' ? 'light' : 'dark';
+    editor.setAttribute('theme', next);
+  });
+</script>
+</body>
+</html>
