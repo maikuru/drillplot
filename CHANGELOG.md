@@ -4,14 +4,9 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
-### Security
-
-- `parseText` and `extractSourceText` read an SVG's embedded source in one left-to-right pass, in linear time. Before, crafted text (a run of unclosed `<!--`, unclosed `<metadata>` tags, or `<metadata ` with no `>`) took time growing with the square of its length: about 4 seconds for 320 KB and over 20 seconds for a megabyte, a denial of service for a server that opens uploaded SVGs. The result is the same for every input (checked against the old code on 300,000 random inputs). Closes CodeQL alerts `js/polynomial-redos` and `js/incomplete-multi-character-sanitization`: nothing is now removed and searched again, so removing a comment cannot form a new one.
-- Development only: `fast-uri` (used by `ajv` in the tests) updated from 3.1.8 to 3.1.9 for GHSA-w74x-v6f9-j3xg, GHSA-wjr9-j795-jxcr, GHSA-xhq7-xmqj-769h and GHSA-333x-w4r6-6crp. The published package has no dependencies and was not affected.
-
 ## [0.2.0] - 2026-10-29
 
-Everything below is optional and still format version 1. A document written for 0.1 validates, saves and renders byte for byte as before; `test/compat.test.ts` checks that against SVGs written by 0.1.1. [docs/coverage-0.2.md](docs/coverage-0.2.md) lists what real drill handouts draw and how each feature is covered.
+Every format addition below is optional and still format version 1. A document written for 0.1 validates, saves and renders byte for byte as before; `test/compat.test.ts` checks that against SVGs written by 0.1.1. [docs/coverage-0.2.md](docs/coverage-0.2.md) lists what real drill handouts draw and how each feature is covered.
 
 ### Added
 
@@ -37,6 +32,11 @@ Everything below is optional and still format version 1. A document written for 
 
 - The editor draws the court being edited; the legend, the printed caption and the other courts appear in Get SVG and the exported SVG.
 - The JSON Schema cannot check an item's `court` against the number of courts; `parseSource` does.
+
+### Security
+
+- `parseText` and `extractSourceText` read an SVG's embedded source in one left-to-right pass, in linear time. Before, crafted text (a run of unclosed `<!--`, unclosed `<metadata>` tags, or `<metadata ` with no `>`) took time growing with the square of its length: about 4 seconds for 320 KB and over 20 seconds for a megabyte, a denial of service for a server that opens uploaded SVGs. The result is the same for every input (checked against the old code on 300,000 random inputs). Closes CodeQL alerts `js/polynomial-redos` and `js/incomplete-multi-character-sanitization`: nothing is now removed and searched again, so removing a comment cannot form a new one.
+- Development only: `fast-uri` (used by `ajv` in the tests) updated from 3.1.8 to 3.1.9 for GHSA-w74x-v6f9-j3xg, GHSA-wjr9-j795-jxcr, GHSA-xhq7-xmqj-769h and GHSA-333x-w4r6-6crp. The published package has no dependencies and was not affected.
 
 ## [0.1.1] - 2026-10-19
 
