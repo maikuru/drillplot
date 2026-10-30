@@ -4,6 +4,35 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-29
+
+Everything below is optional and still format version 1. A document written for 0.1 validates, saves and renders byte for byte as before; `test/compat.test.ts` checks that against SVGs written by 0.1.1. [docs/coverage-0.2.md](docs/coverage-0.2.md) lists what real drill handouts draw and how each feature is covered.
+
+### Added
+
+- **Legend and badges.** A top-level `legend` of notes (`{ key?, color?, text }`) drawn under the court; a `key` badge on players, machines, cones, zones, movement arrows and lines; a new `mark` item, a badge at a point. A note keyed to a shot number uses that shot's badge; a note with a `color` and no key shows a swatch. Short on-court callouts are written this way rather than as free text.
+- **Lines.** A new `line` item with no arrowhead, with `color`, `dash`, `label` and `key`, such as a line to split-step on.
+- **Path styles.** `color` on ball paths, movement arrows and lines (`PATH_COLORS`: yellow, white, orange, red, pink, green, black; `PATH_PALETTE` has the hex values); `dash` on ball paths and lines for a cooperative or optional shot. The arrowhead and the shot badge follow the color.
+- **Start positions and open space.** `ghost: true` draws a player as a dashed ring and a zone as a dashed outline.
+- **Notes and names.** `note` on a player (up to 16 characters) under the disc; `label` on a cone (up to 6 characters) beside it.
+- **Either-or shots.** `alt`, one letter, on a ball path: `2a` and `2b` are choices for shot 2. `ballItems`, `hasShotGap` and `renumberShots` keep alternatives together.
+- **A visible caption.** `showCaption: true` prints the caption under the drawing.
+- **Several courts.** A top-level `courts` list (1 to 4, each with a `label` and a `link` to the next, such as "Winner moves up") and `court` on each item; side by side in portrait, stacked in landscape, each court clipped in its own nested `<svg>`.
+- New error keys `bad_color`, `bad_key`, `bad_alt`, `bad_court`, `bad_courts` and `bad_legend`, and the new limits in `LIMITS`. The JSON Schema describes every addition.
+- The editor edits all of it: a legend badge in the palette, a Line tool, inspector fields for the badge key, role, start position or open space, color, dash and either-or letter, a cone's name and a line's label, and side-panel sections for the printed caption, the legend and the courts (with a court picker in the toolbar; new pieces go on the court being edited).
+- Six generic fixture diagrams rebuilt from real handouts, with SVG snapshots, and a demo gallery of examples including two that use the additions.
+
+### Changed
+
+- The editor's court now scales to fit its area in both directions. Before, the court area grew with the side panel, so on a laptop the court was drawn too large to see whole. The area is `--drillplot-stage-height` tall (default unchanged), or fills the element when the host gives it a height; the side panel scrolls on its own. `:host` is now a flex column.
+- The demo page has a compact header with a link to the GitHub repository, sizes the editor to the window on wide screens, and shows a gallery of examples that open in the editor.
+- Draw order adds lines (after zones) and marks (on top). Items of the 0.1 types keep their order.
+
+### Notes
+
+- The editor draws the court being edited; the legend, the printed caption and the other courts appear in Get SVG and the exported SVG.
+- The JSON Schema cannot check an item's `court` against the number of courts; `parseSource` does.
+
 ## [0.1.1] - 2026-10-19
 
 ### Added
@@ -58,6 +87,7 @@ All notable changes to this project are recorded here. The format follows [Keep 
 - Every action can be done without a pointer: exact coordinate fields for the selected piece, and Enter adds an arrow when an arrow tool is chosen.
 - Unknown team keys and out-of-range values are refused with a message instead of being silently replaced.
 
-[Unreleased]: https://github.com/maikuru/drillplot/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/maikuru/drillplot/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/maikuru/drillplot/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/maikuru/drillplot/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/maikuru/drillplot/releases/tag/v0.1.0
