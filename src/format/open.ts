@@ -18,13 +18,63 @@ const decodeEntities = (s: string): string =>
  * Reads both escaped text and a CDATA section (the earlier concept's exports used CDATA).
  */
 export function extractSourceText(svg: string): string | null {
-  const bare = svg.replace(/<!--[\s\S]*?-->/g, '');
-  const m = /<metadata(?:\s[^>]*)?>([\s\S]*?)<\/metadata>/i.exec(bare);
-  if (!m || m[1] === undefined) return null;
-  const inner = m[1].trim();
+  const raw = metadataText(svg);
+  if (raw === null) return null;
+  const inner = raw.trim();
   if (!inner) return null;
   const cdata = /^<!\[CDATA\[([\s\S]*)\]\]>$/.exec(inner);
   return cdata && cdata[1] !== undefined ? cdata[1] : decodeEntities(inner);
+}
+
+/**
+ * The text of the first <metadata> element outside an XML comment, with any comments inside it
+ * left out. One left-to-right pass over the input, in linear time: no regular expression that
+ * backtracks over untrusted text, and nothing is removed and searched again, so removing a
+ * comment can never form a new one.
+ */
+function metadataText(svg: string): string | null {
+  // a literal pattern, matched from a given position: no backtracking. (Lower-casing the input
+  // instead would shift positions for the few characters whose lower case is longer.)
+  const closeTag = /<\/metadata>/gi;
+  const closeTagFrom = (p: number): number => {
+    closeTag.lastIndex = p;
+    return closeTag.exec(svg)?.index ?? -1;
+  };
+  // the next "-->" at or after a position, remembered so a run of unclosed comments stays linear
+  let close = -2;
+  const closeFrom = (p: number): number => {
+    if (close !== -1 && close < p) close = svg.indexOf('-->', p);
+    return close;
+  };
+  let i = 0;
+  for (;;) {
+    const lt = svg.indexOf('<', i);
+    if (lt < 0) return null;
+    if (svg.startsWith('<!--', lt)) {
+      const end = closeFrom(lt + 4);
+      // an unclosed comment is read as text, as before
+      i = end < 0 ? lt + 4 : end + 3;
+      continue;
+    }
+    const next = svg[lt + 9];
+    if (svg.slice(lt, lt + 9).toLowerCase() === '<metadata' && next !== undefined && /[\s>]/.test(next)) {
+      const open = svg.indexOf('>', lt + 9);
+      if (open < 0) return null;
+      let text = '';
+      let j = open + 1;
+      let end = closeTagFrom(j);
+      for (;;) {
+        if (end < 0) return null;
+        const c = svg.indexOf('<!--', j);
+        const cEnd = c >= 0 && c < end ? closeFrom(c + 4) : -1;
+        if (cEnd < 0) return text + svg.slice(j, end);
+        text += svg.slice(j, c);
+        j = cEnd + 3;
+        if (j > end) end = closeTagFrom(j);
+      }
+    }
+    i = lt + 1;
+  }
 }
 
 function fail(key: ErrorKey): ParseResult {
