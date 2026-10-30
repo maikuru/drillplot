@@ -1,0 +1,12 @@
+{"format":"drill-diagram","version":1,"title":"Every item type","caption":"One of each item, with both curve directions.\nA second line.","view":"full","side":"bottom","orient":"portrait","items":[
+{"type":"zone","x":11,"y":30,"w":8,"h":6,"label":"Deep target"},
+{"type":"zone","x":1,"y":16,"w":4,"h":3},
+{"type":"cone","x":2,"y":33},{"type":"cone","x":-2,"y":46},
+{"type":"machine","x":10,"y":2,"angle":180},{"type":"machine","x":19,"y":20,"angle":37.5},
+{"type":"player","x":5,"y":40,"label":"A","team":"orange"},{"type":"player","x":15,"y":40,"label":"B2","team":"blue"},
+{"type":"player","x":5,"y":4,"label":"Ann","team":"white"},{"type":"player","x":15,"y":4,"label":"Coach","team":"black"},{"type":"player","x":10,"y":10,"label":""},
+{"type":"move","x1":5,"y1":38.5,"x2":5,"y2":31},
+{"type":"ball","x1":10,"y1":3,"x2":5,"y2":38,"curve":false,"bend":1,"n":1},
+{"type":"ball","x1":5,"y1":38,"x2":14,"y2":18,"curve":true,"bend":1,"n":2},
+{"type":"ball","x1":14,"y1":18,"x2":4,"y2":27,"curve":true,"bend":-1,"n":3},
+{"type":"ball","x1":4,"y1":27,"x2":4.5,"y2":27.5,"curve":false,"bend":1,"n":12}]}

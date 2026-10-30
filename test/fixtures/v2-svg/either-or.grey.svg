@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.5 -22.5 49 33.8" width="784" height="541" role="img" aria-label="Pick a shot by the score" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">
+<title>Pick a shot by the score</title>
+<desc>Same start; the score picks the shot.</desc>
+<metadata>{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Pick a shot by the score",
+ "caption": "Same start; the score picks the shot.",
+ "view": "full",
+ "side": "bottom",
+ "orient": "landscape",
+ "showCaption": true,
+ "legend": [
+  {
+   "key": "1a",
+   "text": "Ahead: stay patient and wait for a clear chance."
+  },
+  {
+   "key": "1b",
+   "text": "Behind: take the first clear chance."
+  },
+  {
+   "text": "Choose one before the serve."
+  }
+ ],
+ "items": [
+  {
+   "type": "player",
+   "x": 4,
+   "y": 15.9,
+   "label": "A",
+   "team": "orange"
+  },
+  {
+   "type": "player",
+   "x": 15.8,
+   "y": 15.9,
+   "label": "B",
+   "team": "orange"
+  },
+  {
+   "type": "player",
+   "x": 4,
+   "y": 28.1,
+   "label": "C",
+   "team": "blue"
+  },
+  {
+   "type": "player",
+   "x": 15.8,
+   "y": 28.1,
+   "label": "D",
+   "team": "blue"
+  },
+  {
+   "type": "ball",
+   "x1": 15.5,
+   "y1": 17.1,
+   "x2": 6,
+   "y2": 26.9,
+   "curve": true,
+   "bend": 1,
+   "n": 1,
+   "color": "green",
+   "dash": true,
+   "alt": "a"
+  },
+  {
+   "type": "ball",
+   "x1": 3,
+   "y1": 17.1,
+   "x2": 14,
+   "y2": 26.9,
+   "curve": true,
+   "bend": -1,
+   "n": 1,
+   "color": "orange",
+   "alt": "b"
+  }
+ ]
+}</metadata>
+<rect x="-2.5" y="-22.5" width="49" height="33.8" fill="#ffffff"/>
+<g transform="rotate(-90)"><rect x="-2.5" y="-2.5" width="25" height="49" fill="#6a6a6a"/><rect x="0" y="0" width="20" height="44" fill="#626262"/><rect x="0" y="15" width="20" height="7" fill="#4f4f4f"/><rect x="0" y="22" width="20" height="7" fill="#4f4f4f"/><rect x="0" y="0" width="20" height="44" stroke="#ffffff" stroke-width="0.2" fill="none"/><path d="M0 15H20M0 29H20M10 0V15M10 29V44" stroke="#ffffff" stroke-width="0.2" fill="none"/><text x="10" y="18.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 10 18.5)">Kitchen</text><text x="10" y="25.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 10 25.5)">Kitchen</text><rect x="-1" y="21.82" width="22" height="0.36" fill="#f4f4f4" stroke="#1a1a1a" stroke-width="0.07"/>
+<circle cx="4" cy="15.9" r="1.3" fill="#a3a3a3" stroke="#ffffff" stroke-width="0.14"/><text x="4" y="15.9" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 4 15.9)">A</text>
+<circle cx="15.8" cy="15.9" r="1.3" fill="#a3a3a3" stroke="#ffffff" stroke-width="0.14"/><text x="15.8" y="15.9" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 15.8 15.9)">B</text>
+<circle cx="4" cy="28.1" r="1.3" fill="#5e5e5e" stroke="#ffffff" stroke-width="0.14"/><text x="4" y="28.1" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 4 28.1)">C</text>
+<circle cx="15.8" cy="28.1" r="1.3" fill="#5e5e5e" stroke="#ffffff" stroke-width="0.14"/><text x="15.8" y="28.1" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 15.8 28.1)">D</text>
+<path d="M15.5 17.1Q8.59 19.91 6.45 25.68" fill="none" stroke="#b5b5b5" stroke-width="0.3" stroke-dasharray="0.8 0.6"/><polygon points="6,26.9 5.94,25.49 6.97,25.87" fill="#b5b5b5"/><circle cx="9.67" cy="20.96" r="0.85" fill="#1a1a1a" stroke="#b5b5b5" stroke-width="0.12"/><text x="9.67" y="20.96" dy="0.35em" font-size="0.9" font-weight="700" fill="#b5b5b5" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 9.67 20.96)">1a</text>
+<path d="M3 17.1Q10.66 19.58 13.46 25.72" fill="none" stroke="#a3a3a3" stroke-width="0.3" stroke-linecap="round"/><polygon points="14,26.9 12.96,25.95 13.96,25.49" fill="#a3a3a3"/><circle cx="9.58" cy="20.79" r="0.85" fill="#1a1a1a" stroke="#a3a3a3" stroke-width="0.12"/><text x="9.58" y="20.79" dy="0.35em" font-size="0.9" font-weight="700" fill="#a3a3a3" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 9.58 20.79)">1b</text>
+</g>
+<circle cx="-0.85" cy="4.05" r="0.85" fill="#1a1a1a" stroke="#b5b5b5" stroke-width="0.12"/><text x="-0.85" y="4.05" dy="0.35em" font-size="0.9" font-weight="700" fill="#b5b5b5" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">1a</text><text x="0.5" y="4.05" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em">Ahead: stay patient and wait for a clear chance.</text><circle cx="-0.85" cy="5.95" r="0.85" fill="#1a1a1a" stroke="#a3a3a3" stroke-width="0.12"/><text x="-0.85" y="5.95" dy="0.35em" font-size="0.9" font-weight="700" fill="#a3a3a3" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">1b</text><text x="0.5" y="5.95" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em">Behind: take the first clear chance.</text><text x="0.5" y="7.85" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em">Choose one before the serve.</text><text x="-1.7" y="10.05" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em" font-style="italic">Same start; the score picks the shot.</text>
+</svg>

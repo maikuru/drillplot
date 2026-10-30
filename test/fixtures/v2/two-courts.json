@@ -1,0 +1,17 @@
+{
+ "format": "drill-diagram", "version": 1,
+ "title": "Up and down the courts",
+ "caption": "Play to 7. The winner moves up a court.",
+ "view": "full", "orient": "portrait", "showCaption": true,
+ "courts": [ { "label": "Court 1", "link": "Winner moves up" }, { "label": "Court 2" } ],
+ "items": [
+  { "type": "player", "x": 4.7, "y": 39, "label": "A", "team": "orange" },
+  { "type": "player", "x": 3.3, "y": 3, "label": "C", "team": "blue", "note": "feeder" },
+  { "type": "player", "x": 6.7, "y": 3, "label": "D", "team": "blue" },
+  { "type": "move", "x1": 4, "y1": 5, "x2": 5.5, "y2": 14 },
+  { "type": "player", "x": 4.7, "y": 39, "label": "B", "team": "orange", "court": 2 },
+  { "type": "player", "x": 3.3, "y": 3, "label": "E", "team": "blue", "note": "feeder", "court": 2 },
+  { "type": "player", "x": 6.7, "y": 3, "label": "F", "team": "blue", "court": 2 },
+  { "type": "move", "x1": 4, "y1": 5, "x2": 5.5, "y2": 14, "court": 2 }
+ ]
+}

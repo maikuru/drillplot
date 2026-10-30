@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.5 -2.5 25 49" width="400" height="784" role="img" aria-label="Every item type" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">
+<title>Every item type</title>
+<desc>One of each item, with both curve directions.
+A second line.</desc>
+<metadata>{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Every item type",
+ "caption": "One of each item, with both curve directions.\nA second line.",
+ "view": "full",
+ "side": "bottom",
+ "orient": "portrait",
+ "items": [
+  {
+   "type": "zone",
+   "x": 11,
+   "y": 30,
+   "w": 8,
+   "h": 6,
+   "label": "Deep target"
+  },
+  {
+   "type": "zone",
+   "x": 1,
+   "y": 16,
+   "w": 4,
+   "h": 3,
+   "label": ""
+  },
+  {
+   "type": "cone",
+   "x": 2,
+   "y": 33
+  },
+  {
+   "type": "cone",
+   "x": -2,
+   "y": 46
+  },
+  {
+   "type": "machine",
+   "x": 10,
+   "y": 2,
+   "angle": 180
+  },
+  {
+   "type": "machine",
+   "x": 19,
+   "y": 20,
+   "angle": 37.5
+  },
+  {
+   "type": "player",
+   "x": 5,
+   "y": 40,
+   "label": "A",
+   "team": "orange"
+  },
+  {
+   "type": "player",
+   "x": 15,
+   "y": 40,
+   "label": "B2",
+   "team": "blue"
+  },
+  {
+   "type": "player",
+   "x": 5,
+   "y": 4,
+   "label": "Ann",
+   "team": "white"
+  },
+  {
+   "type": "player",
+   "x": 15,
+   "y": 4,
+   "label": "Coach",
+   "team": "black"
+  },
+  {
+   "type": "player",
+   "x": 10,
+   "y": 10,
+   "label": "",
+   "team": "orange"
+  },
+  {
+   "type": "move",
+   "x1": 5,
+   "y1": 38.5,
+   "x2": 5,
+   "y2": 31
+  },
+  {
+   "type": "ball",
+   "x1": 10,
+   "y1": 3,
+   "x2": 5,
+   "y2": 38,
+   "curve": false,
+   "bend": 1,
+   "n": 1
+  },
+  {
+   "type": "ball",
+   "x1": 5,
+   "y1": 38,
+   "x2": 14,
+   "y2": 18,
+   "curve": true,
+   "bend": 1,
+   "n": 2
+  },
+  {
+   "type": "ball",
+   "x1": 14,
+   "y1": 18,
+   "x2": 4,
+   "y2": 27,
+   "curve": true,
+   "bend": -1,
+   "n": 3
+  },
+  {
+   "type": "ball",
+   "x1": 4,
+   "y1": 27,
+   "x2": 4.5,
+   "y2": 27.5,
+   "curve": false,
+   "bend": 1,
+   "n": 12
+  }
+ ]
+}</metadata>
+<g><rect x="-2.5" y="-2.5" width="25" height="49" fill="#6a6a6a"/><rect x="0" y="0" width="20" height="44" fill="#626262"/><rect x="0" y="15" width="20" height="7" fill="#4f4f4f"/><rect x="0" y="22" width="20" height="7" fill="#4f4f4f"/><rect x="0" y="0" width="20" height="44" stroke="#ffffff" stroke-width="0.2" fill="none"/><path d="M0 15H20M0 29H20M10 0V15M10 29V44" stroke="#ffffff" stroke-width="0.2" fill="none"/><text x="10" y="18.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Kitchen</text><text x="10" y="25.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Kitchen</text><rect x="-1" y="21.82" width="22" height="0.36" fill="#f4f4f4" stroke="#1a1a1a" stroke-width="0.07"/>
+<rect x="11" y="30" width="8" height="6" fill="#a2a2a2" fill-opacity="0.38" stroke="#a2a2a2" stroke-width="0.2"/><text x="15" y="33" dy="0.35em" font-size="1.1" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Deep target</text>
+<rect x="1" y="16" width="4" height="3" fill="#a2a2a2" fill-opacity="0.38" stroke="#a2a2a2" stroke-width="0.2"/>
+<polygon points="2,32 2.85,33.8 1.15,33.8" fill="#797979" stroke="#ffffff" stroke-width="0.12" stroke-linejoin="round"/>
+<polygon points="-2,45 -1.15,46.8 -2.85,46.8" fill="#797979" stroke="#ffffff" stroke-width="0.12" stroke-linejoin="round"/>
+<g transform="translate(10 2) rotate(180)"><rect x="-0.3" y="-1.9" width="0.6" height="1.2" fill="#222222" stroke="#ffffff" stroke-width="0.1"/><rect x="-1.1" y="-0.9" width="2.2" height="1.9" rx="0.3" fill="#3d3d3d" stroke="#ffffff" stroke-width="0.12"/><circle cx="0" cy="0.1" r="0.6" fill="#e2e2e2"/></g>
+<g transform="translate(19 20) rotate(37.5)"><rect x="-0.3" y="-1.9" width="0.6" height="1.2" fill="#222222" stroke="#ffffff" stroke-width="0.1"/><rect x="-1.1" y="-0.9" width="2.2" height="1.9" rx="0.3" fill="#3d3d3d" stroke="#ffffff" stroke-width="0.12"/><circle cx="0" cy="0.1" r="0.6" fill="#e2e2e2"/></g>
+<circle cx="5" cy="40" r="1.3" fill="#a3a3a3" stroke="#ffffff" stroke-width="0.14"/><text x="5" y="40" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">A</text>
+<circle cx="15" cy="40" r="1.3" fill="#5e5e5e" stroke="#ffffff" stroke-width="0.14"/><text x="15" y="40" dy="0.35em" font-size="1.15" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">B2</text>
+<circle cx="5" cy="4" r="1.3" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.14"/><text x="5" y="4" dy="0.35em" font-size="0.9" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Ann</text>
+<circle cx="15" cy="4" r="1.3" fill="#1a1a1a" stroke="#ffffff" stroke-width="0.14"/><text x="15" y="4" dy="0.35em" font-size="0.68" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Coach</text>
+<circle cx="10" cy="10" r="1.3" fill="#a3a3a3" stroke="#ffffff" stroke-width="0.14"/>
+<path d="M5 38.5L5 32.3" fill="none" stroke="#ffffff" stroke-width="0.24" stroke-dasharray="0.7 0.55"/><polygon points="5,31 5.55,32.3 4.45,32.3" fill="#ffffff"/>
+<path d="M10 3L5.18 36.71" fill="none" stroke="#e2e2e2" stroke-width="0.3" stroke-linecap="round"/><polygon points="5,38 4.64,36.64 5.73,36.79" fill="#e2e2e2"/><circle cx="7.5" cy="20.5" r="0.85" fill="#1a1a1a" stroke="#e2e2e2" stroke-width="0.12"/><text x="7.5" y="20.5" dy="0.35em" font-size="1.1" font-weight="700" fill="#e2e2e2" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">1</text>
+<path d="M5 38Q13.9 29.98 13.99 19.3" fill="none" stroke="#e2e2e2" stroke-width="0.3" stroke-linecap="round"/><polygon points="14,18 14.54,19.3 13.44,19.3" fill="#e2e2e2"/><circle cx="11.7" cy="28.99" r="0.85" fill="#1a1a1a" stroke="#e2e2e2" stroke-width="0.12"/><text x="11.7" y="28.99" dy="0.35em" font-size="1.1" font-weight="700" fill="#e2e2e2" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">2</text>
+<path d="M14 18Q10.98 24.7 5.23 26.59" fill="none" stroke="#e2e2e2" stroke-width="0.3" stroke-linecap="round"/><polygon points="4,27 5.06,26.07 5.41,27.12" fill="#e2e2e2"/><circle cx="9.99" cy="23.6" r="0.85" fill="#1a1a1a" stroke="#e2e2e2" stroke-width="0.12"/><text x="9.99" y="23.6" dy="0.35em" font-size="1.1" font-weight="700" fill="#e2e2e2" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">3</text>
+<path d="M4 27L4.2 27.2" fill="none" stroke="#e2e2e2" stroke-width="0.3" stroke-linecap="round"/><polygon points="4.5,27.5 3.81,27.59 4.59,26.81" fill="#e2e2e2"/><circle cx="4.25" cy="27.25" r="0.85" fill="#1a1a1a" stroke="#e2e2e2" stroke-width="0.12"/><text x="4.25" y="27.25" dy="0.35em" font-size="1.1" font-weight="700" fill="#e2e2e2" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">12</text>
+</g>
+</svg>

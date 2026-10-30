@@ -1,0 +1,21 @@
+{
+ "format": "drill-diagram", "version": 1,
+ "title": "Switch sides",
+ "caption": "After each point, look for the gap.",
+ "view": "full", "orient": "landscape", "showCaption": true,
+ "legend": [
+  { "color": "white", "text": "Both partners start on one side." },
+  { "key": "1", "text": "After the first exchange, 1 crosses." },
+  { "key": "2", "text": "2 holds, then both move together." },
+  { "key": "3", "text": "The gap to close." }
+ ],
+ "items": [
+  { "type": "player", "x": 4, "y": 6.4, "label": "1", "team": "orange", "ghost": true },
+  { "type": "player", "x": 15.8, "y": 6.4, "label": "1", "team": "orange" },
+  { "type": "player", "x": 15.8, "y": 12, "label": "2", "team": "orange", "key": "2" },
+  { "type": "player", "x": 4, "y": 34.2, "label": "3", "team": "blue" },
+  { "type": "player", "x": 15.8, "y": 34.2, "label": "4", "team": "blue" },
+  { "type": "mark", "x": 10, "y": 9.5, "key": "3" },
+  { "type": "move", "x1": 14.2, "y1": 6.4, "x2": 5.6, "y2": 6.4, "key": "1" }
+ ]
+}

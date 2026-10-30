@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.5 -2.5 25 59.7" width="400" height="955" role="img" aria-label="Reset to a target" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">
+<title>Reset to a target</title>
+<desc>Counter only off a ball you can attack.</desc>
+<metadata>{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Reset to a target",
+ "caption": "Counter only off a ball you can attack.",
+ "view": "full",
+ "side": "bottom",
+ "orient": "portrait",
+ "showCaption": true,
+ "legend": [
+  {
+   "key": "1",
+   "text": "The attack comes to the middle."
+  },
+  {
+   "key": "2a",
+   "text": "Reset to R1,"
+  },
+  {
+   "key": "2b",
+   "text": "or reset to R2."
+  },
+  {
+   "key": "3",
+   "text": "Partner shifts toward the middle."
+  }
+ ],
+ "items": [
+  {
+   "type": "zone",
+   "x": 3,
+   "y": 23,
+   "w": 6,
+   "h": 5.5,
+   "label": "R1",
+   "ghost": true
+  },
+  {
+   "type": "zone",
+   "x": 11,
+   "y": 23,
+   "w": 6,
+   "h": 5.5,
+   "label": "R2",
+   "ghost": true
+  },
+  {
+   "type": "cone",
+   "x": 5,
+   "y": 43,
+   "label": "T1"
+  },
+  {
+   "type": "cone",
+   "x": 15,
+   "y": 43,
+   "label": "T2"
+  },
+  {
+   "type": "player",
+   "x": 6,
+   "y": 14,
+   "label": "A",
+   "team": "orange"
+  },
+  {
+   "type": "player",
+   "x": 14,
+   "y": 14,
+   "label": "B",
+   "team": "orange"
+  },
+  {
+   "type": "player",
+   "x": 6,
+   "y": 30,
+   "label": "C",
+   "team": "blue"
+  },
+  {
+   "type": "player",
+   "x": 14,
+   "y": 30,
+   "label": "D",
+   "team": "blue"
+  },
+  {
+   "type": "ball",
+   "x1": 6,
+   "y1": 28.6,
+   "x2": 6,
+   "y2": 15.5,
+   "curve": false,
+   "bend": 1,
+   "n": 1,
+   "color": "orange"
+  },
+  {
+   "type": "ball",
+   "x1": 6,
+   "y1": 15.3,
+   "x2": 6,
+   "y2": 25.8,
+   "curve": true,
+   "bend": 1,
+   "n": 2,
+   "alt": "a"
+  },
+  {
+   "type": "ball",
+   "x1": 6.5,
+   "y1": 15.3,
+   "x2": 14,
+   "y2": 25.8,
+   "curve": true,
+   "bend": -1,
+   "n": 2,
+   "alt": "b"
+  },
+  {
+   "type": "move",
+   "x1": 13.5,
+   "y1": 12.5,
+   "x2": 10.5,
+   "y2": 12.5,
+   "color": "green",
+   "key": "3"
+  }
+ ]
+}</metadata>
+<rect x="-2.5" y="-2.5" width="25" height="59.7" fill="#ffffff"/>
+<g><rect x="-2.5" y="-2.5" width="25" height="49" fill="#3d7a4a"/><rect x="0" y="0" width="20" height="44" fill="#2b6ca3"/><rect x="0" y="15" width="20" height="7" fill="#1f5788"/><rect x="0" y="22" width="20" height="7" fill="#1f5788"/><rect x="0" y="0" width="20" height="44" stroke="#ffffff" stroke-width="0.2" fill="none"/><path d="M0 15H20M0 29H20M10 0V15M10 29V44" stroke="#ffffff" stroke-width="0.2" fill="none"/><text x="10" y="18.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Kitchen</text><text x="10" y="25.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Kitchen</text><rect x="-1" y="21.82" width="22" height="0.36" fill="#f4f4f0" stroke="#1a1a1a" stroke-width="0.07"/>
+<rect x="3" y="23" width="6" height="5.5" fill="none" stroke="#ff922b" stroke-width="0.2" stroke-dasharray="0.8 0.6"/><text x="6" y="25.75" dy="0.35em" font-size="1.1" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">R1</text>
+<rect x="11" y="23" width="6" height="5.5" fill="none" stroke="#ff922b" stroke-width="0.2" stroke-dasharray="0.8 0.6"/><text x="14" y="25.75" dy="0.35em" font-size="1.1" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">R2</text>
+<polygon points="5,42 5.85,43.8 4.15,43.8" fill="#ff5a1f" stroke="#ffffff" stroke-width="0.12" stroke-linejoin="round"/><text x="6.1" y="43" dy="0.35em" font-size="1" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="start" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">T1</text>
+<polygon points="15,42 15.85,43.8 14.15,43.8" fill="#ff5a1f" stroke="#ffffff" stroke-width="0.12" stroke-linejoin="round"/><text x="16.1" y="43" dy="0.35em" font-size="1" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="start" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">T2</text>
+<circle cx="6" cy="14" r="1.3" fill="#e69f00" stroke="#ffffff" stroke-width="0.14"/><text x="6" y="14" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">A</text>
+<circle cx="14" cy="14" r="1.3" fill="#e69f00" stroke="#ffffff" stroke-width="0.14"/><text x="14" y="14" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">B</text>
+<circle cx="6" cy="30" r="1.3" fill="#0072b2" stroke="#ffffff" stroke-width="0.14"/><text x="6" y="30" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">C</text>
+<circle cx="14" cy="30" r="1.3" fill="#0072b2" stroke="#ffffff" stroke-width="0.14"/><text x="14" y="30" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">D</text>
+<path d="M13.5 12.5L11.8 12.5" fill="none" stroke="#5fd38d" stroke-width="0.24" stroke-dasharray="0.7 0.55"/><polygon points="10.5,12.5 11.8,11.95 11.8,13.05" fill="#5fd38d"/><circle cx="12" cy="12.5" r="0.75" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.12"/><text x="12" y="12.5" dy="0.35em" font-size="0.94" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">3</text>
+<path d="M6 28.6L6 16.8" fill="none" stroke="#e69f00" stroke-width="0.3" stroke-linecap="round"/><polygon points="6,15.5 6.55,16.8 5.45,16.8" fill="#e69f00"/><circle cx="6" cy="22.05" r="0.85" fill="#1a1a1a" stroke="#e69f00" stroke-width="0.12"/><text x="6" y="22.05" dy="0.35em" font-size="1.1" font-weight="700" fill="#e69f00" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">1</text>
+<path d="M6 15.3Q3.69 20.55 5.48 24.61" fill="none" stroke="#e6f23a" stroke-width="0.3" stroke-linecap="round"/><polygon points="6,25.8 4.97,24.83 5.98,24.39" fill="#e6f23a"/><circle cx="4.85" cy="20.55" r="0.85" fill="#1a1a1a" stroke="#e6f23a" stroke-width="0.12"/><text x="4.85" y="20.55" dy="0.35em" font-size="0.9" font-weight="700" fill="#e6f23a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">2a</text>
+<path d="M6.5 15.3Q12.56 18.9 13.73 24.53" fill="none" stroke="#e6f23a" stroke-width="0.3" stroke-linecap="round"/><polygon points="14,25.8 13.2,24.64 14.27,24.42" fill="#e6f23a"/><circle cx="11.41" cy="19.73" r="0.85" fill="#1a1a1a" stroke="#e6f23a" stroke-width="0.12"/><text x="11.41" y="19.73" dy="0.35em" font-size="0.9" font-weight="700" fill="#e6f23a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">2b</text>
+</g>
+<circle cx="-0.85" cy="48.05" r="0.85" fill="#1a1a1a" stroke="#e69f00" stroke-width="0.12"/><text x="-0.85" y="48.05" dy="0.35em" font-size="1.1" font-weight="700" fill="#e69f00" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">1</text><text x="0.5" y="48.05" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em">The attack comes to the middle.</text><circle cx="-0.85" cy="49.95" r="0.85" fill="#1a1a1a" stroke="#e6f23a" stroke-width="0.12"/><text x="-0.85" y="49.95" dy="0.35em" font-size="0.9" font-weight="700" fill="#e6f23a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">2a</text><text x="0.5" y="49.95" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em">Reset to R1,</text><circle cx="-0.85" cy="51.85" r="0.85" fill="#1a1a1a" stroke="#e6f23a" stroke-width="0.12"/><text x="-0.85" y="51.85" dy="0.35em" font-size="0.9" font-weight="700" fill="#e6f23a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">2b</text><text x="0.5" y="51.85" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em">or reset to R2.</text><circle cx="-0.85" cy="53.75" r="0.75" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.12"/><text x="-0.85" y="53.75" dy="0.35em" font-size="0.94" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">3</text><text x="0.5" y="53.75" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em">Partner shifts toward the middle.</text><text x="-1.7" y="55.95" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em" font-style="italic">Counter only off a ball you can attack.</text>
+</svg>

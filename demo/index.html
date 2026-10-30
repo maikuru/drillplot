@@ -6,72 +6,162 @@
 <title>drillplot: draw pickleball drill diagrams</title>
 <meta name="description" content="Draw pickleball drill diagrams on a to-scale court and export editable SVG.">
 <style>
-  :root { color-scheme: light dark; --bg: #f3f3ef; --fg: #16191d; --muted: #5b6169; --card: #fff; --line: #d8dbe0; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #101316; --fg: #eef0f2; --muted: #a3aab3; --card: #16191d; --line: #2f343b; } }
+  :root { color-scheme: light dark; --bg: #f3f3ef; --fg: #16191d; --muted: #5b6169; --card: #fff; --line: #d8dbe0; --link: #1e4d8c; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #101316; --fg: #eef0f2; --muted: #a3aab3; --card: #16191d; --line: #2f343b; --link: #8fb8f0; } }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 72rem; margin: 0 auto; padding: 1rem max(16px, env(safe-area-inset-right)) 3rem max(16px, env(safe-area-inset-left)); }
-  h1 { margin: .5rem 0 0; font-size: 2rem; }
+  .wrap { max-width: 80rem; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); }
+  header.wrap { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem 1rem; padding-top: .75rem; padding-bottom: .75rem; }
+  header h1 { margin: 0; font-size: 1.5rem; }
+  header p { margin: 0; color: var(--muted); flex: 1 1 22rem; }
+  header nav { display: flex; gap: .5rem; }
+  .gh { display: inline-flex; align-items: center; gap: .4rem; min-height: 40px; padding: 0 .8rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--fg); text-decoration: none; font-weight: 600; }
+  .gh:hover { border-color: var(--muted); }
+  .gh svg { width: 18px; height: 18px; fill: currentColor; }
+  a { color: var(--link); }
+  a:focus-visible, button:focus-visible { outline: 3px solid #1e4d8c; outline-offset: 2px; }
+  main.wrap { padding-bottom: 3rem; }
+  /* On wide screens the editor takes the rest of the window, so the whole court is in view with the header. */
+  @media (min-width: 761px) { drillplot-editor { height: max(32rem, calc(100dvh - 5.5rem)); } }
+  drillplot-editor { --drillplot-radius: 8px; }
   h2 { font-size: 1.2rem; margin: 2rem 0 .5rem; }
   p.lede { color: var(--muted); margin: .25rem 0 1rem; max-width: 46rem; }
-  a { color: inherit; }
   pre, code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .85rem; }
-  pre { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: .75rem; overflow: auto; max-height: 16rem; }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: .75rem; overflow: auto; max-height: 8rem; margin: 0; }
   .row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: .5rem 0; }
   button { min-height: 40px; padding: 0 .9rem; border-radius: 6px; border: 1px solid var(--line); background: var(--card); color: inherit; font: inherit; cursor: pointer; }
-  button:focus-visible { outline: 3px solid #1e4d8c; outline-offset: 2px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
-  figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: .5rem; }
-  figure svg { width: 100%; height: auto; max-height: 28rem; display: block; }
-  figcaption { color: var(--muted); font-size: .9rem; padding-top: .25rem; }
-  /* Restyling the editor from the host page: these are the public tokens. */
-  drillplot-editor { --drillplot-radius: 8px; }
-  #log { max-height: 8rem; }
+  button:hover { border-color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); gap: 1rem; }
+  figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: .5rem; display: flex; flex-direction: column; gap: .5rem; }
+  figure svg { width: 100%; height: auto; max-height: 30rem; display: block; }
+  figure button { margin-top: auto; }
+  figure.wide { grid-column: span 2; }
+  @media (max-width: 40rem) { figure.wide { grid-column: auto; } }
+  figcaption { color: var(--muted); font-size: .9rem; }
+  figcaption strong { color: var(--fg); }
+  footer.wrap { border-top: 1px solid var(--line); padding-top: 1rem; padding-bottom: 2rem; color: var(--muted); font-size: .9rem; }
 </style>
 </head>
 <body>
-<main>
+<header class="wrap">
   <h1>drillplot</h1>
-  <p class="lede">Draw pickleball drill diagrams on a to-scale court and export SVG that carries its own editable source. Add players, cones, a ball machine and target zones, then draw numbered drives, drops and movement arrows.</p>
+  <p>Pickleball drill diagrams on a to-scale court, exported as SVG that carries its own editable source.</p>
+  <nav aria-label="Project">
+    <a class="gh" href="https://github.com/maikuru/drillplot"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Source on GitHub</a>
+  </nav>
+</header>
 
+<main class="wrap">
   <drillplot-editor id="editor" save-label="Save"></drillplot-editor>
+
+  <h2>Examples</h2>
+  <p class="lede">Each drawn with <code>renderSvg()</code> alone. Open one in the editor above to change it. The last two use the 0.2 additions: a keyed legend, a line to split-step on, colored and dashed paths, a start position, open space, roles under players, either-or shots, a printed caption and two courts.</p>
+  <div class="grid" id="examples"></div>
 
   <h2>Events</h2>
   <p class="lede">The editor fires <code>change</code> on every edit and <code>save</code> from its Save button (or Ctrl or Cmd + S).</p>
-  <div class="row"><button id="sample" type="button">Load the sample drill</button><button id="theme" type="button">Switch theme</button></div>
+  <div class="row"><button id="theme" type="button">Switch the editor's theme</button><button id="grey" type="button">Show the current drawing in greyscale</button></div>
   <pre id="log" aria-live="polite">Nothing yet.</pre>
-
-  <h2>The renderer on its own</h2>
-  <p class="lede">The same source, drawn with <code>renderSvg()</code> and no editor: color, then the greyscale view (display only; exports keep their colors).</p>
-  <div class="grid">
-    <figure id="r-color"></figure>
-    <figure id="r-grey"></figure>
-  </div>
+  <div class="grid" style="margin-top:1rem"><figure id="current"></figure></div>
 </main>
+
+<footer class="wrap">
+  <a href="https://github.com/maikuru/drillplot">github.com/maikuru/drillplot</a> ·
+  <a href="https://github.com/maikuru/drillplot/blob/main/docs/format.md">Format</a> ·
+  <a href="https://github.com/maikuru/drillplot/blob/main/docs/api.md">API</a> ·
+  <a href="https://www.npmjs.com/package/drillplot">npm</a> · MIT license
+</footer>
 
 <script type="module">
   import { renderSvg, sampleDrill } from './dist/index.js';
   import './dist/editor.js';
 
+  // Generic examples of the 0.2 additions (the same ones the tests draw).
+  const splitStep = {
+    format: 'drill-diagram', version: 1, title: 'Split step on a line', caption: 'Be still before each contact.',
+    view: 'full', side: 'bottom', orient: 'landscape', showCaption: true,
+    legend: [
+      { key: '1', text: 'Hit from the back, then move up.' },
+      { key: '2', text: 'Stop and split on the dashed line.' },
+      { key: '3', text: 'Play the next ball from a balanced stop.' },
+      { color: 'orange', text: 'Dashed box: the space your partner left open.' },
+    ],
+    items: [
+      { type: 'zone', x: 12, y: 1, w: 7, h: 7, label: '', ghost: true },
+      { type: 'line', x1: 0, y1: 9.5, x2: 20, y2: 9.5, color: 'orange', dash: true, key: '2' },
+      { type: 'player', x: 10, y: 2.4, label: 'A', team: 'orange', note: 'hitter', ghost: true },
+      { type: 'player', x: 10, y: 11.5, label: 'A', team: 'orange', note: 'hitter' },
+      { type: 'player', x: 15, y: 30.8, label: 'F', team: 'black', note: 'feeder' },
+      { type: 'move', x1: 10, y1: 3.9, x2: 10, y2: 8.6, key: '1' },
+      { type: 'ball', x1: 13.5, y1: 29.6, x2: 11.2, y2: 13, n: 3, color: 'white', dash: true },
+    ],
+  };
+  const eitherOr = {
+    format: 'drill-diagram', version: 1, title: 'Either-or, on two courts', caption: 'Play to 7. The winner moves up a court.',
+    view: 'half', side: 'top', orient: 'portrait', showCaption: true,
+    courts: [{ label: 'Court 1', link: 'Winner moves up' }, { label: 'Court 2' }],
+    legend: [
+      { key: '1a', text: 'Ahead: a patient drop.' },
+      { key: '1b', text: 'Behind: drive the first chance.' },
+    ],
+    items: [
+      { type: 'player', x: 6, y: 4, label: 'A', team: 'orange' },
+      { type: 'player', x: 14, y: 18, label: 'C', team: 'blue', note: 'feeder' },
+      { type: 'ball', x1: 6, y1: 5.5, x2: 14, y2: 20.5, curve: true, bend: -1, n: 1, alt: 'a', color: 'green', dash: true },
+      { type: 'ball', x1: 6.5, y1: 5.5, x2: 4, y2: 21, n: 1, alt: 'b', color: 'orange' },
+      { type: 'player', x: 6, y: 4, label: 'B', team: 'orange', court: 2 },
+      { type: 'player', x: 14, y: 18, label: 'D', team: 'blue', note: 'feeder', court: 2 },
+      { type: 'cone', x: 4, y: 19, label: 'T1', court: 2 },
+      { type: 'cone', x: 16, y: 19, label: 'T2', court: 2 },
+    ],
+  };
+  const examples = [
+    ['The sample drill', sampleDrill()],
+    ['Machine feed, half court', { format: 'drill-diagram', version: 1, title: 'Machine feed to the kitchen', view: 'half', side: 'top', orient: 'landscape', items: [
+      { type: 'machine', x: 10, y: 1, angle: 180 }, { type: 'player', x: 10, y: 18, label: 'A' }, { type: 'ball', x1: 10, y1: 3, x2: 10, y2: 16, n: 1 }] }],
+    ['Legend, split-step line, start position and open space (0.2)', splitStep],
+    ['Either-or shots on two courts (0.2)', eitherOr],
+  ];
+
   const editor = document.getElementById('editor');
   const log = document.getElementById('log');
   const note = (line) => { log.textContent = line + '\n' + (log.textContent === 'Nothing yet.' ? '' : log.textContent); };
-
-  const draw = (source) => {
-    document.getElementById('r-color').innerHTML = renderSvg(source) + '<figcaption>renderSvg(source)</figcaption>';
-    document.getElementById('r-grey').innerHTML = renderSvg(source, { greyscale: true }) + '<figcaption>renderSvg(source, { greyscale: true })</figcaption>';
+  let grey = false;
+  const drawCurrent = (source) => {
+    document.getElementById('current').innerHTML = renderSvg(source, { greyscale: grey }) +
+      `<figcaption><strong>The editor's drawing</strong>, from <code>renderSvg(source${grey ? ', { greyscale: true }' : ''})</code></figcaption>`;
   };
 
-  editor.source = sampleDrill();
-  draw(editor.source);
+  const box = document.getElementById('examples');
+  for (const [name, source] of examples) {
+    const fig = document.createElement('figure');
+    fig.innerHTML = renderSvg(source) + `<figcaption><strong>${name}</strong></figcaption>`;
+    if (source.legend || source.courts) fig.classList.add('wide');
+    const open = document.createElement('button');
+    open.type = 'button';
+    open.textContent = 'Open in the editor';
+    open.addEventListener('click', () => {
+      editor.source = source;
+      drawCurrent(editor.source);
+      note(`loaded "${source.title}"`);
+      editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    fig.append(open);
+    box.append(fig);
+  }
 
-  editor.addEventListener('change', (e) => { draw(e.detail.source); note(`change: ${e.detail.source.items.length} items`); });
+  editor.source = sampleDrill();
+  drawCurrent(editor.source);
+  editor.addEventListener('change', (e) => { drawCurrent(e.detail.source); note(`change: ${e.detail.source.items.length} items`); });
   editor.addEventListener('save', (e) => note(`save: "${e.detail.source.title}", ${e.detail.svg.length} characters of SVG`));
   editor.addEventListener('source-error', (e) => note('source-error: ' + e.detail.errors.map((x) => x.key).join(', ')));
-  document.getElementById('sample').addEventListener('click', () => { editor.source = sampleDrill(); draw(editor.source); note('loaded the sample'); });
   document.getElementById('theme').addEventListener('click', () => {
-    const next = editor.getAttribute('theme') === 'dark' ? 'light' : 'dark';
-    editor.setAttribute('theme', next);
+    editor.setAttribute('theme', editor.getAttribute('theme') === 'dark' ? 'light' : 'dark');
+  });
+  document.getElementById('grey').addEventListener('click', (e) => {
+    grey = !grey;
+    e.target.textContent = grey ? 'Show the current drawing in color' : 'Show the current drawing in greyscale';
+    drawCurrent(editor.source);
   });
 </script>
 </body>

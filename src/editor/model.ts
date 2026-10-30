@@ -6,8 +6,8 @@ import { courtView } from '../render/geometry.js';
 
 /** An item as the editor holds it: the source item plus an id that never leaves the editor. */
 export type EditorItem = Item & { id: string };
-export type Meta = Pick<DrillSource, 'title' | 'caption' | 'view' | 'side' | 'orient'>;
-export type Kind = 'pA' | 'pB' | 'pC' | 'pD' | 'pCoach' | 'machine' | 'cone' | 'zone';
+export type Meta = Pick<DrillSource, 'title' | 'caption' | 'view' | 'side' | 'orient' | 'showCaption' | 'courts' | 'legend'>;
+export type Kind = 'pA' | 'pB' | 'pC' | 'pD' | 'pCoach' | 'machine' | 'cone' | 'zone' | 'mark';
 
 export const KIND_NAME: Record<Kind, string> = {
   pA: 'player A',
@@ -18,6 +18,7 @@ export const KIND_NAME: Record<Kind, string> = {
   machine: 'a ball machine',
   cone: 'a cone',
   zone: 'a target zone',
+  mark: 'a legend badge',
 };
 
 const KINDS: Record<Kind, Item> = {
@@ -29,7 +30,30 @@ const KINDS: Record<Kind, Item> = {
   machine: { type: 'machine', x: 0, y: 0, angle: 0 },
   cone: { type: 'cone', x: 0, y: 0 },
   zone: { type: 'zone', x: 0, y: 0, w: 6, h: 4, label: '' },
+  mark: { type: 'mark', x: 0, y: 0, key: '1' },
 };
+
+/** The lowest whole number not yet used as a legend key or shot number. */
+export function nextKey(source: { items: readonly Item[]; legend?: DrillSource['legend'] }): string {
+  const used = new Set<string>();
+  for (const it of source.items) {
+    if (it.type === 'ball') used.add(String(it.n));
+    else if (it.key) used.add(it.key);
+  }
+  for (const e of source.legend ?? []) if (e.key) used.add(e.key);
+  let n = 1;
+  while (used.has(String(n))) n++;
+  return String(n);
+}
+
+/** Drops the optional fields that are unset, so a source the editor writes has no empty extras. */
+export function metaOf(source: Meta): Meta {
+  const m: Meta = { title: source.title, caption: source.caption, view: source.view, side: source.side, orient: source.orient };
+  if (source.showCaption) m.showCaption = true;
+  if (source.courts) m.courts = source.courts.map((c) => ({ ...c }));
+  if (source.legend) m.legend = source.legend.map((e) => ({ ...e }));
+  return m;
+}
 
 export const round2 = (v: number): number => Math.round(v * 100) / 100;
 export const clamp = (v: number, a: number, b: number): number => Math.min(b, Math.max(a, v));
@@ -69,8 +93,11 @@ export class DrillModel {
     return id === null ? undefined : this.items.find((i) => i.id === id);
   }
 
+  /** The court new pieces go on, when the diagram has several. */
+  court = 1;
+
   snap(withMeta = false): Entry {
-    return withMeta ? { items: clone(this.items), meta: { ...this.meta } } : { items: clone(this.items) };
+    return withMeta ? { items: clone(this.items), meta: metaOf(this.meta) } : { items: clone(this.items) };
   }
 
   /** Records `before` as an undo step if anything changed since. */
@@ -98,7 +125,8 @@ export class DrillModel {
 
   private restore(e: Entry): void {
     this.items = e.items;
-    if (e.meta) this.meta = { ...e.meta };
+    if (e.meta) this.meta = metaOf(e.meta);
+    this.court = Math.min(this.court, this.meta.courts?.length ?? 1);
   }
 
   undo(): void {
@@ -120,8 +148,9 @@ export class DrillModel {
   /** Replaces everything with a validated source. Undoable, including title and view. */
   load(source: DrillSource, { undoable }: { undoable: boolean }): void {
     const before = this.snap(true);
-    this.meta = { title: source.title, caption: source.caption, view: source.view, side: source.side, orient: source.orient };
+    this.meta = metaOf(source);
     this.items = source.items.map((it) => ({ ...clone(it), id: this.uid() }));
+    this.court = 1;
     if (undoable) {
       this.undoStack.push(before);
       this.redoStack = [];
@@ -134,11 +163,13 @@ export class DrillModel {
   /** The source, without editor ids. */
   toSource(): DrillSource {
     const items = this.items.map(({ id: _id, ...rest }) => clone(rest) as Item);
-    return { ...emptySource(), ...this.meta, items };
+    return { ...emptySource(), ...metaOf(this.meta), items };
   }
 
   makeItem(kind: Kind, x: number, y: number): EditorItem {
     const it = { ...clone(KINDS[kind]), id: this.uid() } as EditorItem;
+    if (it.type === 'mark') it.key = nextKey({ items: this.items, legend: this.meta.legend });
+    if (this.court > 1) it.court = this.court;
     const cx = clampX(x);
     const cy = clampY(y);
     if (it.type === 'zone') {
@@ -186,12 +217,17 @@ export class DrillModel {
     this.act(() => moveBy(it, dx, dy, it));
   }
 
-  /** Adds an arrow of the given kind with its start and end already set. */
-  addArrow(tool: 'drive' | 'drop' | 'move', x1: number, y1: number, x2: number, y2: number): EditorItem {
-    const base = { id: this.uid(), x1: clampX(x1), y1: clampY(y1), x2: clampX(x2), y2: clampY(y2) };
-    return tool === 'move'
-      ? { type: 'move', ...base }
-      : { type: 'ball', ...base, curve: tool === 'drop', bend: 1, n: Math.min(nextShotNumber(this.items), LIMITS.maxShot) };
+  /** Adds an arrow (or a plain line) of the given kind with its start and end already set. */
+  addArrow(tool: 'drive' | 'drop' | 'move' | 'line', x1: number, y1: number, x2: number, y2: number): EditorItem {
+    const base = { id: this.uid(), x1: clampX(x1), y1: clampY(y1), x2: clampX(x2), y2: clampY(y2), ...(this.court > 1 ? { court: this.court } : {}) };
+    if (tool === 'move') return { type: 'move', ...base };
+    if (tool === 'line') return { type: 'line', ...base };
+    return { type: 'ball', ...base, curve: tool === 'drop', bend: 1, n: Math.min(nextShotNumber(this.items), LIMITS.maxShot) };
+  }
+
+  /** The items on the court being edited. */
+  onCourt(): EditorItem[] {
+    return this.meta.courts ? this.items.filter((it) => (it.court ?? 1) === this.court) : this.items;
   }
 
   /** Swaps the shot number with the neighbouring shot. */

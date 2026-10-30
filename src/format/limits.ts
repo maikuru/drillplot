@@ -20,6 +20,16 @@ export const LIMITS = {
   zoneLabelLength: 24,
   zoneWidth: { min: 1, max: COURT.width },
   zoneHeight: { min: 1, max: COURT.length },
+  /** Since 0.2. */
+  noteLength: 16,
+  coneLabelLength: 6,
+  lineLabelLength: 24,
+  keyLength: 3,
+  legendEntries: 20,
+  legendTextLength: 100,
+  courts: { min: 1, max: 4 },
+  courtLabelLength: 24,
+  courtLinkLength: 40,
 } as const;
 
 export const FORMAT_NAME = 'drill-diagram' as const;
@@ -32,3 +42,6 @@ export const LEGACY_TEAMS: Readonly<Record<string, (typeof PLAYER_COLORS)[number
   t2: 'blue',
   coach: 'black',
 };
+
+/** Since 0.2. Path colors and what they draw as. */
+export const PATH_COLORS = ['yellow', 'white', 'orange', 'red', 'pink', 'green', 'black'] as const;

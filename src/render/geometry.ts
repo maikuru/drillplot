@@ -81,8 +81,8 @@ export function arrowGeom(it: Arrow): ArrowGeometry {
   return { poly, d, mx, my };
 }
 
-/** Back to front: zones, cones, machines, players, movement, ball paths. Stable within a layer. */
-const LAYER: Record<Item['type'], number> = { zone: 0, cone: 1, machine: 2, player: 3, move: 4, ball: 5 };
+/** Back to front: zones, lines, cones, machines, players, movement, ball paths, legend marks. Stable within a layer. */
+const LAYER: Record<Item['type'], number> = { zone: 0, line: 1, cone: 2, machine: 3, player: 4, move: 5, ball: 6, mark: 7 };
 export function drawOrder<T extends Item>(items: readonly T[]): T[] {
   return items
     .map((it, i) => [it, i] as const)

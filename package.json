@@ -1,6 +1,6 @@
 {
   "name": "drillplot",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Pickleball drill diagram editor (a web component) and SVG renderer: draw players, cones and numbered shots on a to-scale court, then export editable SVG.",
   "license": "MIT",
   "author": "Mike LP",

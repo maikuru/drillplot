@@ -2,11 +2,11 @@
 
 This is the specification of the `drill-diagram` source format that `drillplot` reads, writes and embeds in the SVG it exports. The code is the reference implementation: [`src/format`](../src/format) is the validator and [`schema/drill-diagram.v1.schema.json`](../schema/drill-diagram.v1.schema.json) is the JSON Schema, and a shared set of samples in [`test/schema.test.ts`](../test/schema.test.ts) keeps the two in agreement. How to use them is in [api.md](api.md); the short version is in the [README](../README.md).
 
-**Contents:** [Overview](#overview) · [Coordinates and court geometry](#coordinates-and-court-geometry) · [The document](#the-document) · [Items](#items) · [Text rules](#text-rules) · [Limits](#limits) · [Normalization](#normalization) · [Drawing](#drawing) · [Embedding in SVG](#embedding-in-svg) · [Versioning and compatibility](#versioning-and-compatibility) · [Legacy team keys](#legacy-team-keys) · [Examples](#examples) · [Error keys](#error-keys)
+**Contents:** [Overview](#overview) · [Coordinates and court geometry](#coordinates-and-court-geometry) · [The document](#the-document) · [Items](#items) · [Additions in 0.2](#additions-in-02) · [Text rules](#text-rules) · [Limits](#limits) · [Normalization](#normalization) · [Drawing](#drawing) · [Embedding in SVG](#embedding-in-svg) · [Versioning and compatibility](#versioning-and-compatibility) · [Legacy team keys](#legacy-team-keys) · [Examples](#examples) · [Error keys](#error-keys)
 
 ## Overview
 
-A source is one JSON object. It describes a pickleball court view and a list of items placed on it: players, ball machines, cones, target zones, movement arrows and numbered ball paths. Everything is measured in feet on a regulation court.
+A source is one JSON object. It describes a pickleball court view and a list of items placed on it: players, ball machines, cones, target zones, movement arrows and numbered ball paths. Everything is measured in feet on a regulation court. Package 0.2 adds optional fields and two item types, all still in format version 1: see [Additions in 0.2](#additions-in-02).
 
 The words "must", "may" and "should" are used in the usual specification sense. A **reader** is anything that opens a source (the validator, the editor); a **writer** produces one.
 
@@ -69,6 +69,9 @@ Item coordinates always stay in court feet, whatever the orientation: a source r
 | `view` | string | no | `"full"` | `"full"`, `"half"` or `"kitchen"`. |
 | `side` | string | no | `"bottom"` | `"bottom"` or `"top"`. Only used when `view` is `"half"`, but always validated. |
 | `orient` | string | no | `"portrait"` | `"portrait"` or `"landscape"`. |
+| `showCaption` | boolean | no | `false` | Since 0.2. Also draw the caption as text under the court. See [the visible caption](#the-visible-caption). |
+| `courts` | array | no | | Since 0.2. One to four [courts](#several-courts) drawn side by side. |
+| `legend` | array | no | | Since 0.2. Up to 20 [legend notes](#legend-and-badges) drawn under the court. |
 | `items` | array | yes | | Up to 200 [items](#items). May be empty. |
 
 Unknown properties, at the top level or on an item, are ignored by a reader and dropped on save. (This is how the editor-internal `id` that earlier exports carried disappears.)
@@ -148,9 +151,116 @@ A numbered ball path: a shot.
 
 Shot order is by `n`; paths with the same `n` keep their order in `items`. Numbers do not have to be consecutive, but the editor offers Renumber to close gaps, and the helpers in [api.md](api.md#shot-numbering) do the same in code. A curved path's control point sits 22 percent of its length off the midpoint, so the path's furthest point is about 11 percent of its length from the straight line.
 
+## Additions in 0.2
+
+Package 0.2 extends format version 1 with the optional fields and item types below, so that a diagram can carry everything a printed drill handout shows: a keyed legend, a line to split-step on, path colors and dashes with a meaning, start positions and open space, a role under a player, either-or shots, a visible caption, more than one court, and named targets. ([coverage-0.2.md](coverage-0.2.md) is the inventory this came from.)
+
+The rules that keep 0.1 documents unchanged:
+
+- Every addition is optional. A reader **does not fill it in**: a normalized source carries a 0.2 field only when it is set, and a boolean only when it is `true`. Empty text (`""`) is the same as leaving the field out. So a document written for 0.1 normalizes, saves (`stringifySource`) and renders exactly as it did, byte for byte.
+- `stringifySource` writes the 0.2 fields after the 0.1 fields: `showCaption`, `courts` and `legend` after `orient` (before `items`), and on each item after its 0.1 fields in the order listed below.
+- A 0.1 package opening a document that uses an addition drops an unknown field on save, and refuses an unknown item type (`line`, `mark`) with `unknown_item_type`, as [Versioning and compatibility](#versioning-and-compatibility) says.
+
+### Legend and badges
+
+A **legend** is a list of notes drawn under the court, in order. Each note is an object:
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `key` | string | no | 1 to 3 characters, one line, not only spaces. The note explains the badge with this key. |
+| `color` | string | no | A [path color](#path-styles). For a note with no key: drawn as a swatch, for a note that explains a color. |
+| `text` | string | yes | Up to 100 characters, one line. The renderer wraps it. |
+
+A note's key matches a **badge** on the court. Any of `player`, `machine`, `cone`, `zone`, `move` and `line` may carry a `key` (the same rule as above), drawn as a small white disc with the key in dark text: beside a player, a machine or a cone, inside a zone's corner, at the middle of a movement arrow, and at the start of a line. A ball path's badge is its shot number, so a note whose key is a shot label (`"2"`, or `"2a"` for [an alternative](#either-or-shots)) is drawn with that shot's dark badge, unless an item also carries that key. Keys do not have to be unique and need not match anything.
+
+A **`mark`** is a badge on its own, at a point:
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `type` | `"mark"` | yes | |
+| `x`, `y` | number | yes | Center of the badge, in feet. |
+| `key` | string | yes | The badge, as above. |
+
+Short on-court callouts ("go", "split", "mine") are written as badges with legend notes, not as free text on the court: one mechanism, text that never collides with pieces, stays upright and legible at print size, and is read in order by a screen reader.
+
+### Lines
+
+A **`line`** is a plain line with no arrowhead, such as the line across the court where players split-step.
+
+| Field | Type | Required | Default | Meaning |
+| --- | --- | --- | --- | --- |
+| `type` | `"line"` | yes | | |
+| `x1`, `y1`, `x2`, `y2` | number | yes | | The ends, in feet. |
+| `color` | string | no | `"white"` | A [path color](#path-styles). |
+| `dash` | boolean | no | `false` | Drawn dashed. |
+| `label` | string | no | | Up to 24 characters, one line, written above the middle of the line. |
+| `key` | string | no | | A [badge](#legend-and-badges) at the start. |
+
+### Path styles
+
+`ball`, `move` and `line` may carry a **`color`**, one of `yellow`, `white`, `orange`, `red`, `pink`, `green` and `black` (the path, its arrowhead and a ball path's shot badge take it). The defaults are unchanged: yellow ball paths, white movement arrows. A `ball` (and a `line`) may also be **`dash`**ed, the usual mark of a cooperative or optional shot. Movement arrows are always dashed. What a color means is up to the diagram; say it in the legend, with a swatch note if you like.
+
+### Start positions and open space
+
+`ghost: true` on a **player** draws a dashed white ring with the label inside and no fill: where a player starts, was, or is going. On a **zone** it draws the outline only, dashed: space left open, or a target outlined rather than filled.
+
+### Notes and names
+
+A **player** may have a **`note`**, up to 16 characters, one line, written under the disc: a role such as "feeder" or "hitter", or a name. A **cone** may have a **`label`**, up to 6 characters, one line, written beside it: a named target such as "T1" or "R2".
+
+### Either-or shots
+
+A ball path may have **`alt`**, one lower-case letter. Paths with the same `n` that each have a letter are choices for that shot, not a sequence: their badges read `2a`, `2b`. Shot order sorts by `n`, then by letter; [renumbering](api.md#shot-numbering) gives the choices one number between them.
+
+### The visible caption
+
+With `showCaption: true` the caption is also drawn as text under the court (and under the legend), in italics, wrapped to the width of the drawing, keeping its own line breaks. It is in `<desc>` either way.
+
+### Several courts
+
+`courts` lists one to four courts, drawn side by side in portrait and stacked in landscape, each framed by the same `view`. Each court is an object:
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `label` | string | no | Up to 24 characters, one line, written above the court. |
+| `link` | string | no | Up to 40 characters, one line, written in the gap after this court with an arrow to the next one, such as "Winner moves up". Ignored on the last court. |
+
+Every item may then say which court it is on with **`court`**, a whole number from 1 to the number of courts (1 when left out). Each court's items keep their own coordinates on their own court. Without `courts`, `court` may only be 1. The schema checks that `court` is from 1 to 4; only the reader can check it against the number of courts.
+
+### Drawing the additions
+
+A source with a `legend`, `showCaption` or `courts` is drawn on a white page: the courts (each clipped to its frame in its own nested `<svg>` viewport), then the legend notes, one per row with their badge or swatch, then the caption. The page grows to fit; its `width` and `height` stay 16 pixels per foot. A source without any of these three is drawn exactly as in 0.1.
+
+### An example
+
+```json
+{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Split step on a line",
+ "caption": "Be still before each contact.",
+ "view": "half",
+ "side": "top",
+ "orient": "portrait",
+ "showCaption": true,
+ "legend": [
+  { "key": "1", "text": "Move up after the third shot." },
+  { "key": "2", "text": "Split on the line." },
+  { "color": "pink", "text": "Pink: the cooperative feed." }
+ ],
+ "items": [
+  { "type": "line", "x1": 0, "y1": 9.5, "x2": 20, "y2": 9.5, "color": "orange", "dash": true, "label": "Split", "key": "2" },
+  { "type": "player", "x": 10, "y": 1.5, "label": "A", "team": "orange", "ghost": true },
+  { "type": "player", "x": 10, "y": 9.5, "label": "A", "team": "orange", "note": "hitter" },
+  { "type": "move", "x1": 10, "y1": 3, "x2": 10, "y2": 8, "key": "1" },
+  { "type": "ball", "x1": 14, "y1": 21, "x2": 11.2, "y2": 10.4, "n": 1, "color": "pink", "dash": true }
+ ]
+}
+```
+
 ## Text rules
 
-`title`, `label` (player and zone) and `caption` are plain text; markup in them is not an error because it is text, and the renderer escapes it.
+`title`, `label` (player, zone and, since 0.2, cone and line), `caption`, and the 0.2 `note`, `key`, legend `text`, and court `label` and `link` are plain text; markup in them is not an error because it is text, and the renderer escapes it.
 
 - **Length** counts Unicode code points, not UTF-16 units, so an emoji counts as one.
 - **A title and labels are one line:** no control character at all (U+0000 to U+001F, U+007F).
@@ -173,6 +283,13 @@ Shot order is by `n`; paths with the same `n` keep their order in `items`. Numbe
 | Position `x` | -2 to 22 feet | `out_of_bounds` |
 | Position `y` | -2 to 46 feet | `out_of_bounds` |
 | Machine angle | 0 up to, not including, 360 degrees | `bad_angle` |
+| Player note (0.2) | 16 characters | `label_too_long` |
+| Cone label (0.2) | 6 characters | `label_too_long` |
+| Line label (0.2) | 24 characters | `label_too_long` |
+| Badge or legend key (0.2) | 1 to 3 characters, not only spaces | `bad_key` |
+| Legend notes (0.2) | 20, each up to 100 characters | `bad_legend`, `label_too_long` |
+| Courts (0.2) | 1 to 4; label 24, link 40 characters | `bad_courts`, `label_too_long` |
+| Item `court` (0.2) | 1 to the number of courts | `bad_court` |
 
 These are exported from the package as `LIMITS`, `COURT` and `BOUNDS`. Range checks use the number as written, before rounding: `-2.004` is out of bounds even though it would round to `-2`. A number must be a finite JSON number; `"7"` (a string), `null` and `NaN` are `not_a_number`.
 
@@ -193,7 +310,8 @@ The JSON Schema describes the shape and the limits, but it does not round or fil
 The renderer ([`renderSvg`](api.md#rendersvgsource-options)) draws, back to front:
 
 1. The court: grass, the court surface, the two kitchens in a darker blue, the lines, the labels "Kitchen", and the net.
-2. Items by layer: zones, cones, machines, players, movement arrows, ball paths. Within a layer the order in `items` is kept.
+2. Items by layer: zones, lines, cones, machines, players, movement arrows, ball paths, marks. Within a layer the order in `items` is kept. (Lines and marks are since 0.2.)
+3. Since 0.2, the legend and the visible caption under the court; see [Drawing the additions](#drawing-the-additions).
 
 So a ball path is always above a player, whatever their order in the list. The SVG's own `width` and `height` are 16 pixels per foot of the frame. In greyscale mode every color becomes its luma grey; this is for display and the editor never exports it.
 
@@ -314,10 +432,10 @@ bad_shot_number  /items/1/n
 | `not_an_object` | The value is not a JSON object (a number, `null`, an array). `parseText` gives this for JSON text that is not an object. | `""` |
 | `wrong_format` | `format` is not `"drill-diagram"`. `version` is not checked until the format matches. | `/format` |
 | `unsupported_version` | `format` is right but `version` is not `1`. The message says the diagram is from a newer version. | `/version` |
-| `not_text` | `title`, `caption` or a `label` is not a string. | `/title`, `/caption`, `/items/N/label` |
+| `not_text` | `title`, `caption`, a `label`, or a 0.2 text field is not a string; or a legend note has no `text`. | the field |
 | `title_too_long` | The title is over 120 characters. | `/title` |
 | `caption_too_long` | The caption is over 300 characters. | `/caption` |
-| `label_too_long` | A player label is over 8 or a zone label over 24 characters. | `/items/N/label` |
+| `label_too_long` | A player label is over 8 or a zone label over 24 characters, or a 0.2 text field is over [its limit](#limits). | the field |
 | `bad_character` | Text has a control character not allowed in that field, U+FFFE, U+FFFF, or an unpaired surrogate. | the text field |
 | `bad_view` | `view` is not `full`, `half` or `kitchen`. | `/view` |
 | `bad_side` | `side` is not `bottom` or `top`. | `/side` |
@@ -325,7 +443,7 @@ bad_shot_number  /items/1/n
 | `items_not_array` | `items` is missing or is not an array. | `/items` |
 | `too_many_items` | More than 200 items. No item is checked then. | `/items` |
 | `item_not_object` | An item is not an object (`null`, a number, an array). | `/items/N` |
-| `unknown_item_type` | `type` is missing or not one of `player`, `machine`, `cone`, `zone`, `move`, `ball`. | `/items/N/type` |
+| `unknown_item_type` | `type` is missing or not one of `player`, `machine`, `cone`, `zone`, `move`, `ball`, `line`, `mark`. | `/items/N/type` |
 | `not_a_number` | A coordinate, size or angle is missing, not a number, or not finite. | the field |
 | `out_of_bounds` | A position is outside -2 to 22 (`x`) or -2 to 46 (`y`). | the field |
 | `bad_size` | A zone `w` or `h` is outside 1 to 20 or 1 to 44. | `/items/N/w`, `/h` |
@@ -333,7 +451,13 @@ bad_shot_number  /items/1/n
 | `bad_team` | A player `team` is not a known color or legacy key. | `/items/N/team` |
 | `bad_bend` | A ball `bend` is not `1` or `-1`. | `/items/N/bend` |
 | `bad_shot_number` | A ball `n` is missing, not a whole number, or outside 1 to 200. | `/items/N/n` |
-| `not_boolean` | A ball `curve` is not `true` or `false`. | `/items/N/curve` |
+| `not_boolean` | A ball `curve`, or a 0.2 `dash`, `ghost` or `showCaption`, is not `true` or `false`. | the field |
+| `bad_color` | Since 0.2. A `color` is not a path color. | `/items/N/color`, `/legend/N/color` |
+| `bad_key` | Since 0.2. A `key` is not 1 to 3 characters of one-line text, or is only spaces; or a `mark` has none. | `/items/N/key`, `/legend/N/key` |
+| `bad_alt` | Since 0.2. A ball `alt` is not one letter `a` to `z`. | `/items/N/alt` |
+| `bad_court` | Since 0.2. An item's `court` is not a whole number from 1 to the number of courts. | `/items/N/court` |
+| `bad_courts` | Since 0.2. `courts` is not a list of 1 to 4 objects. | `/courts` |
+| `bad_legend` | Since 0.2. `legend` is not a list of at most 20 objects. A note without `text` is `not_text`. | `/legend` |
 | `empty_input` | `parseText` was given empty or whitespace-only text. | `""` |
 | `no_svg_source` | `parseText` was given an SVG with no embedded source (not made by drillplot). | `""` |
 | `bad_svg_source` | `parseText` found a source in the SVG but it is not valid JSON. | `""` |

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://maikuru.github.io/drillplot/schema/drill-diagram.v1.schema.json",
   "title": "drillplot drill diagram, format 1",
-  "description": "The editable source of a pickleball drill diagram. Positions are court feet: x 0 to 20 across, y 0 to 44 along, the net at y = 22. Items may sit up to 2 feet outside the court lines. Unknown properties are ignored by the reader and dropped on save.",
+  "description": "The editable source of a pickleball drill diagram. Positions are court feet: x 0 to 20 across, y 0 to 44 along, the net at y = 22. Items may sit up to 2 feet outside the court lines. Unknown properties are ignored by the reader and dropped on save. Fields and item types marked 'since 0.2' are optional additions that a 0.1 document never has.",
   "type": "object",
   "required": ["format", "version", "items"],
   "properties": {
@@ -13,6 +13,20 @@
     "view": { "enum": ["full", "half", "kitchen"], "default": "full" },
     "side": { "enum": ["bottom", "top"], "default": "bottom", "description": "Which half to show when view is half." },
     "orient": { "enum": ["portrait", "landscape"], "default": "portrait" },
+    "showCaption": { "type": "boolean", "default": false, "description": "Since 0.2. Also draw the caption as text under the court." },
+    "courts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "description": "Since 0.2. One to four courts drawn side by side (stacked in landscape). Items choose one with court; the reader also checks that court is not above the number of courts, which this schema cannot.",
+      "items": { "$ref": "#/$defs/court" }
+    },
+    "legend": {
+      "type": "array",
+      "maxItems": 20,
+      "description": "Since 0.2. Notes drawn under the court, each matched to the badge with the same key.",
+      "items": { "$ref": "#/$defs/legendEntry" }
+    },
     "items": {
       "type": "array",
       "maxItems": 200,
@@ -23,7 +37,9 @@
           { "$ref": "#/$defs/cone" },
           { "$ref": "#/$defs/zone" },
           { "$ref": "#/$defs/move" },
-          { "$ref": "#/$defs/ball" }
+          { "$ref": "#/$defs/ball" },
+          { "$ref": "#/$defs/lineItem" },
+          { "$ref": "#/$defs/mark" }
         ]
       }
     }
@@ -53,7 +69,11 @@
         "x": { "$ref": "#/$defs/x" },
         "y": { "$ref": "#/$defs/y" },
         "label": { "$ref": "#/$defs/line", "type": "string", "maxLength": 8 },
-        "team": { "$ref": "#/$defs/team", "default": "orange" }
+        "team": { "$ref": "#/$defs/team", "default": "orange" },
+        "note": { "$ref": "#/$defs/line", "type": "string", "maxLength": 16, "description": "Since 0.2. A role or name under the disc." },
+        "ghost": { "type": "boolean", "default": false, "description": "Since 0.2. A dashed ring: where the player starts or was." },
+        "key": { "$ref": "#/$defs/key" },
+        "court": { "$ref": "#/$defs/courtIndex" }
       }
     },
     "machine": {
@@ -63,7 +83,9 @@
         "type": { "const": "machine" },
         "x": { "$ref": "#/$defs/x" },
         "y": { "$ref": "#/$defs/y" },
-        "angle": { "type": "number", "minimum": 0, "exclusiveMaximum": 360, "default": 0 }
+        "angle": { "type": "number", "minimum": 0, "exclusiveMaximum": 360, "default": 0 },
+        "key": { "$ref": "#/$defs/key" },
+        "court": { "$ref": "#/$defs/courtIndex" }
       }
     },
     "cone": {
@@ -72,7 +94,10 @@
       "properties": {
         "type": { "const": "cone" },
         "x": { "$ref": "#/$defs/x" },
-        "y": { "$ref": "#/$defs/y" }
+        "y": { "$ref": "#/$defs/y" },
+        "label": { "$ref": "#/$defs/line", "type": "string", "maxLength": 6, "description": "Since 0.2. A short name beside the cone." },
+        "key": { "$ref": "#/$defs/key" },
+        "court": { "$ref": "#/$defs/courtIndex" }
       }
     },
     "zone": {
@@ -84,7 +109,10 @@
         "y": { "$ref": "#/$defs/y" },
         "w": { "type": "number", "minimum": 1, "maximum": 20 },
         "h": { "type": "number", "minimum": 1, "maximum": 44 },
-        "label": { "$ref": "#/$defs/line", "type": "string", "maxLength": 24 }
+        "label": { "$ref": "#/$defs/line", "type": "string", "maxLength": 24 },
+        "ghost": { "type": "boolean", "default": false, "description": "Since 0.2. Outline only: space left open." },
+        "key": { "$ref": "#/$defs/key" },
+        "court": { "$ref": "#/$defs/courtIndex" }
       }
     },
     "move": {
@@ -95,7 +123,10 @@
         "x1": { "$ref": "#/$defs/x" },
         "y1": { "$ref": "#/$defs/y" },
         "x2": { "$ref": "#/$defs/x" },
-        "y2": { "$ref": "#/$defs/y" }
+        "y2": { "$ref": "#/$defs/y" },
+        "color": { "$ref": "#/$defs/pathColor", "default": "white" },
+        "key": { "$ref": "#/$defs/key" },
+        "court": { "$ref": "#/$defs/courtIndex" }
       }
     },
     "ball": {
@@ -109,7 +140,76 @@
         "y2": { "$ref": "#/$defs/y" },
         "curve": { "type": "boolean", "default": false },
         "bend": { "enum": [1, -1], "default": 1 },
-        "n": { "type": "integer", "minimum": 1, "maximum": 200, "description": "Shot number." }
+        "n": { "type": "integer", "minimum": 1, "maximum": 200, "description": "Shot number." },
+        "color": { "$ref": "#/$defs/pathColor", "default": "yellow" },
+        "dash": { "type": "boolean", "default": false, "description": "Since 0.2. A dashed path: a cooperative or optional shot." },
+        "alt": {
+          "type": "string",
+          "pattern": "^[a-z]$",
+          "description": "Since 0.2. Paths with the same n and a letter are either-or choices for that shot."
+        },
+        "court": { "$ref": "#/$defs/courtIndex" }
+      }
+    },
+    "pathColor": { "description": "Since 0.2. A path color in place of the default.", "enum": ["yellow", "white", "orange", "red", "pink", "green", "black"] },
+    "key": {
+      "description": "Since 0.2. A legend badge: 1 to 3 characters on one line, not only spaces.",
+      "$ref": "#/$defs/line",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3,
+      "pattern": "\\S"
+    },
+    "courtIndex": { "description": "Since 0.2. Which court the item is on, from 1. Default 1.", "type": "integer", "minimum": 1, "maximum": 4 },
+    "court": {
+      "type": "object",
+      "properties": {
+        "label": { "$ref": "#/$defs/line", "type": "string", "maxLength": 24 },
+        "link": {
+          "$ref": "#/$defs/line",
+          "type": "string",
+          "maxLength": 40,
+          "description": "Written in the gap after this court, with an arrow to the next."
+        }
+      }
+    },
+    "legendEntry": {
+      "type": "object",
+      "required": ["text"],
+      "description": "A note: with a key, it explains the badge with that key; without one, it may show a swatch of a path color.",
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "color": { "$ref": "#/$defs/pathColor" },
+        "text": { "$ref": "#/$defs/line", "type": "string", "maxLength": 100 }
+      }
+    },
+    "lineItem": {
+      "description": "Since 0.2. A plain line with no arrowhead.",
+      "type": "object",
+      "required": ["type", "x1", "y1", "x2", "y2"],
+      "properties": {
+        "type": { "const": "line" },
+        "x1": { "$ref": "#/$defs/x" },
+        "y1": { "$ref": "#/$defs/y" },
+        "x2": { "$ref": "#/$defs/x" },
+        "y2": { "$ref": "#/$defs/y" },
+        "color": { "$ref": "#/$defs/pathColor", "default": "white" },
+        "dash": { "type": "boolean", "default": false },
+        "label": { "$ref": "#/$defs/line", "type": "string", "maxLength": 24 },
+        "key": { "$ref": "#/$defs/key" },
+        "court": { "$ref": "#/$defs/courtIndex" }
+      }
+    },
+    "mark": {
+      "description": "Since 0.2. A legend badge at a point.",
+      "type": "object",
+      "required": ["type", "x", "y", "key"],
+      "properties": {
+        "type": { "const": "mark" },
+        "x": { "$ref": "#/$defs/x" },
+        "y": { "$ref": "#/$defs/y" },
+        "key": { "$ref": "#/$defs/key" },
+        "court": { "$ref": "#/$defs/courtIndex" }
       }
     }
   }

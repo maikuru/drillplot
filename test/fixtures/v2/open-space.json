@@ -1,0 +1,20 @@
+{
+ "format": "drill-diagram", "version": 1,
+ "title": "Cross and cover",
+ "caption": "Call before you move.",
+ "view": "full", "orient": "landscape", "showCaption": true,
+ "legend": [
+  { "key": "1", "text": "Call it, then cross for the middle ball." },
+  { "key": "2", "text": "Partner slides across behind." },
+  { "color": "orange", "text": "Dashed box: the space left open." }
+ ],
+ "items": [
+  { "type": "zone", "x": 1, "y": 2, "w": 7, "h": 7.5, "label": "", "ghost": true },
+  { "type": "player", "x": 4, "y": 11.2, "label": "A", "team": "orange", "note": "crosser" },
+  { "type": "player", "x": 15.8, "y": 11.2, "label": "B", "team": "orange", "note": "partner" },
+  { "type": "player", "x": 4, "y": 34.2, "label": "C", "team": "blue" },
+  { "type": "player", "x": 15.8, "y": 34.2, "label": "D", "team": "blue" },
+  { "type": "move", "x1": 5.2, "y1": 12.6, "x2": 9.2, "y2": 19.1, "color": "orange", "key": "1" },
+  { "type": "move", "x1": 14.2, "y1": 11.2, "x2": 6.8, "y2": 11.2, "key": "2" }
+ ]
+}

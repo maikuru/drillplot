@@ -15,7 +15,7 @@ Draw pickleball drill diagrams on a to-scale court and export editable SVG.
   <img src="docs/sample-drill.svg" alt="A pickleball court seen from above. Two orange players and one blue player, two cones and an orange target zone in the far kitchen. A numbered straight drive, a numbered curved drop and two dashed movement arrows toward the kitchen line." width="300">
 </p>
 
-drillplot is a small TypeScript library and a drop-in web component. You place players, cones, a ball machine and target zones on a 20 by 44 foot court, draw numbered drives, drops and movement arrows, and export an SVG that carries its own editable source, so a diagram can be reopened and changed later. No framework, no runtime dependencies. [Try the live demo](https://maikuru.github.io/drillplot/).
+drillplot is a small TypeScript library and a drop-in web component. You place players, cones, a ball machine and target zones on a 20 by 44 foot court, draw numbered drives, drops and movement arrows, and export an SVG that carries its own editable source, so a diagram can be reopened and changed later. Since 0.2 a diagram can also carry a keyed legend, a line to split-step on, path colors and dashes, start positions and open space, a role under a player, either-or shots, a printed caption and up to four courts side by side. No framework, no runtime dependencies. [Try the live demo](https://maikuru.github.io/drillplot/).
 
 The image above is [`docs/sample-drill.svg`](docs/sample-drill.svg), produced by `renderSvg(sampleDrill())`. Paste its text into the editor's Open from source box and it is editable.
 
@@ -178,7 +178,9 @@ The same caution as in React applies: bind the initial drawing, not a value you 
 
 ## The editor reference
 
-`<drillplot-editor>` is a self-contained widget with a palette (players A to D and a coach, ball machine, cone, target zone), select, move and nudge, delete, undo and redo, an inspector, Full court, Half court and Kitchen zoom views, Portrait and Landscape, the greyscale view, Get SVG (with Copy SVG and Copy source) and Open from source. Every method and type is in [docs/api.md](docs/api.md).
+`<drillplot-editor>` is a self-contained widget with a palette (players A to D and a coach, ball machine, cone, target zone, legend badge), select, move and nudge, delete, undo and redo, an inspector, Full court, Half court and Kitchen zoom views, Portrait and Landscape, the greyscale view, Get SVG (with Copy SVG and Copy source) and Open from source. Its side panel edits the legend, the printed caption and the courts.
+
+The court scales to fit its area in both directions, keeping its shape, so a host page never sizes it by hand. That area is as tall as the stage-height [theming](#theming) property says; give the element a height of its own (for example `height: 100dvh`, or as a flex or grid child) and the court fills it instead, with the side panel scrolling beside it. Every method and type is in [docs/api.md](docs/api.md).
 
 ### Attributes and properties
 
@@ -240,7 +242,7 @@ Custom properties inherit into the shadow tree, so set any of these on `drillplo
 | `--drillplot-select` | Selection ring and handles |
 | `--drillplot-radius` | Corner radius (default `6px`) |
 | `--drillplot-touch-target` | Minimum control size (default `44px`) |
-| `--drillplot-stage-height` | Height of the court area (default `min(78vh, 760px)`) |
+| `--drillplot-stage-height` | Height of the court area when the element has no height of its own (default `min(78vh, 760px)`; on narrow screens `clamp(300px, 62vh, 560px)`) |
 | `--drillplot-side-width` | Width of the side panel (default `340px`) |
 
 ```css
@@ -319,6 +321,7 @@ A schema describes the shape; `parseSource` is what the editor and renderer use,
 
 - [docs/format.md](docs/format.md): the `drill-diagram` version 1 format as a specification: every field, limits, court geometry, coordinates, versioning, error keys.
 - [docs/api.md](docs/api.md): every export of `drillplot`, `drillplot/editor` and `drillplot/schema`, with signatures and examples.
+- [docs/coverage-0.2.md](docs/coverage-0.2.md): what real drill handouts draw, and how the 0.2 additions cover it.
 - [CHANGELOG.md](CHANGELOG.md): what changed in each release.
 - [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [SECURITY.md](SECURITY.md).
 

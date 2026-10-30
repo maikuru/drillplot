@@ -48,24 +48,37 @@ export function parseText(input: string): ParseResult {
   return parseSource(t);
 }
 
+/** Each item's keys in order: the 0.1 fields, then the optional 0.2 fields, which are written only when set. */
 const KEY_ORDER: Record<string, readonly string[]> = {
-  player: ['type', 'x', 'y', 'label', 'team'],
-  machine: ['type', 'x', 'y', 'angle'],
-  cone: ['type', 'x', 'y'],
-  zone: ['type', 'x', 'y', 'w', 'h', 'label'],
-  move: ['type', 'x1', 'y1', 'x2', 'y2'],
-  ball: ['type', 'x1', 'y1', 'x2', 'y2', 'curve', 'bend', 'n'],
+  player: ['type', 'x', 'y', 'label', 'team', 'note', 'ghost', 'key', 'court'],
+  machine: ['type', 'x', 'y', 'angle', 'key', 'court'],
+  cone: ['type', 'x', 'y', 'label', 'key', 'court'],
+  zone: ['type', 'x', 'y', 'w', 'h', 'label', 'ghost', 'key', 'court'],
+  move: ['type', 'x1', 'y1', 'x2', 'y2', 'color', 'key', 'court'],
+  ball: ['type', 'x1', 'y1', 'x2', 'y2', 'curve', 'bend', 'n', 'color', 'dash', 'alt', 'court'],
+  line: ['type', 'x1', 'y1', 'x2', 'y2', 'color', 'dash', 'label', 'key', 'court'],
+  mark: ['type', 'x', 'y', 'key', 'court'],
 };
+
+const present = (rec: Record<string, unknown>, keys: readonly string[]): Record<string, unknown> =>
+  Object.fromEntries(keys.filter((k) => k in rec && rec[k] !== undefined).map((k) => [k, rec[k]]));
 
 /** The same source with its keys in a fixed order, so the same drawing is always the same text. */
 function canonical(source: DrillSource): unknown {
   const items = source.items.map((it) => {
     const order = KEY_ORDER[it.type] ?? [];
-    const rec = it as unknown as Record<string, unknown>;
-    return Object.fromEntries(order.filter((k) => k in rec).map((k) => [k, rec[k]]));
+    return present(it as unknown as Record<string, unknown>, order);
   });
   const { format, version, title, caption, view, side, orient } = source;
-  return { format, version, title, caption, view, side, orient, items };
+  const extra = present(
+    {
+      showCaption: source.showCaption || undefined,
+      courts: source.courts?.map((ct) => present(ct as Record<string, unknown>, ['label', 'link'])),
+      legend: source.legend?.map((e) => present(e as unknown as Record<string, unknown>, ['key', 'color', 'text'])),
+    },
+    ['showCaption', 'courts', 'legend'],
+  );
+  return { format, version, title, caption, view, side, orient, ...extra, items };
 }
 
 /** The source as JSON text, as stored in a file or copied from the editor. Key order is fixed. */

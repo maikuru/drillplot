@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.5 -4.7 56 54" width="896" height="864" role="img" aria-label="Up and down the courts" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">
+<title>Up and down the courts</title>
+<desc>Play to 7. The winner moves up a court.</desc>
+<metadata>{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Up and down the courts",
+ "caption": "Play to 7. The winner moves up a court.",
+ "view": "full",
+ "side": "bottom",
+ "orient": "portrait",
+ "showCaption": true,
+ "courts": [
+  {
+   "label": "Court 1",
+   "link": "Winner moves up"
+  },
+  {
+   "label": "Court 2"
+  }
+ ],
+ "items": [
+  {
+   "type": "player",
+   "x": 4.7,
+   "y": 39,
+   "label": "A",
+   "team": "orange"
+  },
+  {
+   "type": "player",
+   "x": 3.3,
+   "y": 3,
+   "label": "C",
+   "team": "blue",
+   "note": "feeder"
+  },
+  {
+   "type": "player",
+   "x": 6.7,
+   "y": 3,
+   "label": "D",
+   "team": "blue"
+  },
+  {
+   "type": "move",
+   "x1": 4,
+   "y1": 5,
+   "x2": 5.5,
+   "y2": 14
+  },
+  {
+   "type": "player",
+   "x": 4.7,
+   "y": 39,
+   "label": "B",
+   "team": "orange",
+   "court": 2
+  },
+  {
+   "type": "player",
+   "x": 3.3,
+   "y": 3,
+   "label": "E",
+   "team": "blue",
+   "note": "feeder",
+   "court": 2
+  },
+  {
+   "type": "player",
+   "x": 6.7,
+   "y": 3,
+   "label": "F",
+   "team": "blue",
+   "court": 2
+  },
+  {
+   "type": "move",
+   "x1": 4,
+   "y1": 5,
+   "x2": 5.5,
+   "y2": 14,
+   "court": 2
+  }
+ ]
+}</metadata>
+<rect x="-2.5" y="-4.7" width="56" height="54" fill="#ffffff"/>
+<svg x="-2.5" y="-2.5" width="25" height="49" viewBox="-2.5 -2.5 25 49"><g><rect x="-2.5" y="-2.5" width="25" height="49" fill="#3d7a4a"/><rect x="0" y="0" width="20" height="44" fill="#2b6ca3"/><rect x="0" y="15" width="20" height="7" fill="#1f5788"/><rect x="0" y="22" width="20" height="7" fill="#1f5788"/><rect x="0" y="0" width="20" height="44" stroke="#ffffff" stroke-width="0.2" fill="none"/><path d="M0 15H20M0 29H20M10 0V15M10 29V44" stroke="#ffffff" stroke-width="0.2" fill="none"/><text x="10" y="18.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Kitchen</text><text x="10" y="25.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Kitchen</text><rect x="-1" y="21.82" width="22" height="0.36" fill="#f4f4f0" stroke="#1a1a1a" stroke-width="0.07"/>
+<circle cx="4.7" cy="39" r="1.3" fill="#e69f00" stroke="#ffffff" stroke-width="0.14"/><text x="4.7" y="39" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">A</text>
+<circle cx="3.3" cy="3" r="1.3" fill="#0072b2" stroke="#ffffff" stroke-width="0.14"/><text x="3.3" y="3" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">C</text><text x="3.3" y="5.05" dy="0.35em" font-size="0.9" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">feeder</text>
+<circle cx="6.7" cy="3" r="1.3" fill="#0072b2" stroke="#ffffff" stroke-width="0.14"/><text x="6.7" y="3" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">D</text>
+<path d="M4 5L5.29 12.72" fill="none" stroke="#ffffff" stroke-width="0.24" stroke-dasharray="0.7 0.55"/><polygon points="5.5,14 4.74,12.81 5.83,12.63" fill="#ffffff"/>
+</g></svg>
+<text x="10" y="-3.3" font-size="1.3" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Court 1</text>
+<path d="M23.9 22H26.4" stroke="#1a1a1a" stroke-width="0.24"/><polygon points="27.2,22 26.3,21.5 26.3,22.5" fill="#1a1a1a"/><text x="25.5" y="19.15" dy="0.35em" font-size="0.85" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Winner</text><text x="25.5" y="20.25" dy="0.35em" font-size="0.85" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">moves up</text>
+<svg x="28.5" y="-2.5" width="25" height="49" viewBox="-2.5 -2.5 25 49"><g><rect x="-2.5" y="-2.5" width="25" height="49" fill="#3d7a4a"/><rect x="0" y="0" width="20" height="44" fill="#2b6ca3"/><rect x="0" y="15" width="20" height="7" fill="#1f5788"/><rect x="0" y="22" width="20" height="7" fill="#1f5788"/><rect x="0" y="0" width="20" height="44" stroke="#ffffff" stroke-width="0.2" fill="none"/><path d="M0 15H20M0 29H20M10 0V15M10 29V44" stroke="#ffffff" stroke-width="0.2" fill="none"/><text x="10" y="18.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Kitchen</text><text x="10" y="25.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Kitchen</text><rect x="-1" y="21.82" width="22" height="0.36" fill="#f4f4f0" stroke="#1a1a1a" stroke-width="0.07"/>
+<circle cx="4.7" cy="39" r="1.3" fill="#e69f00" stroke="#ffffff" stroke-width="0.14"/><text x="4.7" y="39" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">B</text>
+<circle cx="3.3" cy="3" r="1.3" fill="#0072b2" stroke="#ffffff" stroke-width="0.14"/><text x="3.3" y="3" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">E</text><text x="3.3" y="5.05" dy="0.35em" font-size="0.9" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">feeder</text>
+<circle cx="6.7" cy="3" r="1.3" fill="#0072b2" stroke="#ffffff" stroke-width="0.14"/><text x="6.7" y="3" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">F</text>
+<path d="M4 5L5.29 12.72" fill="none" stroke="#ffffff" stroke-width="0.24" stroke-dasharray="0.7 0.55"/><polygon points="5.5,14 4.74,12.81 5.83,12.63" fill="#ffffff"/>
+</g></svg>
+<text x="41" y="-3.3" font-size="1.3" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">Court 2</text>
+<text x="-1.7" y="48.05" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em" font-style="italic">Play to 7. The winner moves up a court.</text>
+</svg>

@@ -26,4 +26,19 @@ describe('shot numbering', () => {
     renumberShots(items);
     expect(items.map((i) => (i.type === 'ball' ? i.n : 0))).toEqual([1, 2]);
   });
+
+  it('alternatives for one shot share a number when renumbered (since 0.2)', () => {
+    const alt = (n: number, a: string): Item => ({ ...(b(n) as Extract<Item, { type: 'ball' }>), alt: a });
+    const items = [b(1), alt(4, 'b'), alt(4, 'a'), b(6)];
+    expect(ballItems(items).map((x) => `${x.n}${x.alt ?? ''}`)).toEqual(['1', '4a', '4b', '6']);
+    expect(hasShotGap(items)).toBe(true);
+    renumberShots(items);
+    expect(items.map((i) => (i.type === 'ball' ? `${i.n}${i.alt ?? ''}` : ''))).toEqual(['1', '2b', '2a', '3']);
+    expect(hasShotGap(items)).toBe(false);
+  });
+  it('one path with a letter is still its own shot', () => {
+    const items: Item[] = [b(1), { ...(b(1) as Extract<Item, { type: 'ball' }>), alt: 'a' }];
+    renumberShots(items);
+    expect(items.map((i) => (i.type === 'ball' ? i.n : 0))).toEqual([1, 2]);
+  });
 });
