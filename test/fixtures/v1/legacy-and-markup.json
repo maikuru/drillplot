@@ -1,0 +1,3 @@
+{"format":"drill-diagram","version":1,"title":"Legacy <keys> & \"markup\"","caption":"</desc><g>","items":[
+{"id":"i1","type":"player","x":7,"y":40,"label":"<b>","team":"t1"},{"id":"i2","type":"player","x":13,"y":40,"label":"&amp;","team":"t2"},{"id":"i3","type":"player","x":10,"y":4,"team":"coach"},
+{"type":"zone","x":2,"y":2,"w":5,"h":5,"label":"</text>"},{"type":"machine","x":3,"y":30,"angle":359.996}]}

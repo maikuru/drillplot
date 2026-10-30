@@ -1,0 +1,4 @@
+{"format":"drill-diagram","version":1,"title":"Kitchen zoom, landscape","caption":"Dinks cross court.","view":"kitchen","orient":"landscape","items":[
+{"type":"player","x":4,"y":29.5,"label":"A","team":"orange"},{"type":"player","x":16,"y":14.5,"label":"C","team":"blue"},
+{"type":"ball","x1":4,"y1":28.5,"x2":15,"y2":17,"curve":true,"n":1},{"type":"ball","x1":15,"y1":16,"x2":5,"y2":26,"curve":true,"bend":-1,"n":2},
+{"type":"zone","x":13,"y":15,"w":7,"h":7,"label":"Cross"}]}
