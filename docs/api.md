@@ -28,8 +28,9 @@ All are exported values, read-only (`as const` or `Readonly`).
 | `LIMITS` | see below | Input caps. |
 | `PLAYER_COLORS` | `readonly ['orange', 'blue', 'white', 'black']` | The valid `team` values. |
 | `LEGACY_TEAMS` | `Readonly<Record<string, PlayerColor>>` | `{ t1: 'orange', t2: 'blue', coach: 'black' }`, the older keys that still open. |
+| `PATH_COLORS` | `readonly ['yellow', 'white', 'orange', 'red', 'pink', 'green', 'black']` | Since 0.2. The valid `color` values of ball paths, movement arrows, lines and legend swatches. |
 
-`LIMITS` is `{ maxItems: 200, maxShot: 200, titleLength: 120, captionLength: 300, playerLabelLength: 8, zoneLabelLength: 24, zoneWidth: { min: 1, max: 20 }, zoneHeight: { min: 1, max: 44 } }`.
+`LIMITS` is `{ maxItems: 200, maxShot: 200, titleLength: 120, captionLength: 300, playerLabelLength: 8, zoneLabelLength: 24, zoneWidth: { min: 1, max: 20 }, zoneHeight: { min: 1, max: 44 }, noteLength: 16, coneLabelLength: 6, lineLabelLength: 24, keyLength: 3, legendEntries: 20, legendTextLength: 100, courts: { min: 1, max: 4 }, courtLabelLength: 24, courtLinkLength: 40 }`. The limits after `zoneHeight` are since 0.2.
 
 ```js
 import { COURT, BOUNDS, LIMITS } from 'drillplot';
@@ -161,7 +162,7 @@ Ball paths carry a shot number `n`. These helpers work on an `items` array.
 function ballItems<T extends Item>(items: readonly T[]): Extract<T, Ball>[]
 ```
 
-The ball paths in shot order (by `n`; equal numbers keep their list order). Returns a new array of the same objects.
+The ball paths in shot order (by `n`, then by the either-or letter `alt`; otherwise equal numbers keep their list order). Returns a new array of the same objects.
 
 #### `nextShotNumber(items)`
 
@@ -177,7 +178,7 @@ One more than the highest `n` among the ball paths, or 1 when there are none. It
 function hasShotGap(items: readonly Item[]): boolean
 ```
 
-`true` when, in shot order, the numbers are not exactly 1, 2, 3 and so on up to the count.
+`true` when, in shot order, the numbers are not exactly 1, 2, 3 and so on up to the count. Since 0.2, paths that share a number and both have an `alt` letter are choices for one shot and count once.
 
 #### `renumberShots(items)`
 
@@ -185,7 +186,7 @@ function hasShotGap(items: readonly Item[]): boolean
 function renumberShots(items: readonly Item[]): void
 ```
 
-Numbers the ball paths 1 to N in their current order. **Mutates** the ball items it is given.
+Numbers the ball paths 1 to N in their current order, giving either-or alternatives (same `n`, each with an `alt`) one number between them. **Mutates** the ball items it is given.
 
 ```js
 import { sampleDrill, hasShotGap, renumberShots, nextShotNumber, ballItems } from 'drillplot';
@@ -215,6 +216,7 @@ Renders a source to a standalone SVG string.
 - **`source`**: a validated `DrillSource`, ideally from `parseSource`. The renderer does not validate and is not defensive about malformed input.
 - **`options.greyscale`**: draw every color as its grey (luma, the same weights as the CSS `grayscale()` filter). For display only; exports should keep their colors.
 - **Returns** the SVG text. Deterministic: the same source gives the same text. Explicit fills and strokes (no CSS, no `currentColor`), a `viewBox`, `width` and `height` at 16 pixels per foot, `role="img"`, an `aria-label` and `<title>` (the title, or "Drill diagram"), a `<desc>` when there is a caption, the source in `<metadata>`, and no `id` or `class`. Text is XML-escaped and characters XML cannot carry are removed.
+- **Since 0.2**, a source with a `legend`, `showCaption` or `courts` draws a taller (or, with courts, wider) picture on a white page: the courts side by side (stacked in landscape), each clipped in its own nested `<svg>` viewport, then the legend and the caption under them. A source without those fields draws exactly as 0.1.1 did, byte for byte. Text is wrapped by an estimate of character widths, as there is no DOM to measure it.
 - **Throws** nothing for valid input.
 
 ```js
@@ -233,6 +235,14 @@ const PLAYER_PALETTE: Record<PlayerColor, readonly [string, string, string]>
 ```
 
 The player colors as `[fill, letter, outline]` hex strings: `orange` `['#e69f00', '#1a1a1a', '#ffffff']`, `blue` `['#0072b2', '#ffffff', '#ffffff']`, `white` `['#ffffff', '#1a1a1a', '#1a1a1a']`, `black` `['#1a1a1a', '#ffffff', '#ffffff']`. The Okabe-Ito set, chosen to differ in lightness as well as hue.
+
+#### `PATH_PALETTE`
+
+```ts
+const PATH_PALETTE: Record<PathColor, readonly [string, string, string]>
+```
+
+Since 0.2. The path colors as `[stroke, badge fill, badge number]` hex strings: `yellow` `#e6f23a` (the ball path default), `white` `#ffffff` (the movement and line default), `orange` `#e69f00`, `red` `#ff6a3d`, `pink` `#ff8fd0`, `green` `#5fd38d`, each with a dark badge, and `black` `#1a1a1a` with a white badge. Chosen to read on the court's blues.
 
 #### `toGrey(hex)`
 
@@ -330,7 +340,7 @@ The return type is not exported by name; use `ReturnType<typeof arrowGeom>`.
 function drawOrder<T extends Item>(items: readonly T[]): T[]
 ```
 
-The items back to front: zones, cones, machines, players, movement arrows, ball paths; stable within a layer. A new array.
+The items back to front: zones, lines, cones, machines, players, movement arrows, ball paths, legend marks; stable within a layer. A new array.
 
 ### `sampleDrill()`
 
@@ -350,14 +360,23 @@ type CourtView = 'full' | 'half' | 'kitchen';
 type HalfSide = 'bottom' | 'top';
 type Orientation = 'portrait' | 'landscape';
 
-interface Player  { type: 'player';  x: number; y: number; label: string; team: PlayerColor }
-interface Machine { type: 'machine'; x: number; y: number; angle: number }
-interface Cone    { type: 'cone';    x: number; y: number }
-interface Zone    { type: 'zone';    x: number; y: number; w: number; h: number; label: string }
-interface Move    { type: 'move';    x1: number; y1: number; x2: number; y2: number }
-interface Ball    { type: 'ball';    x1: number; y1: number; x2: number; y2: number; curve: boolean; bend: 1 | -1; n: number }
+type PathColor = 'yellow' | 'white' | 'orange' | 'red' | 'pink' | 'green' | 'black'; // since 0.2
 
-type Item = Player | Machine | Cone | Zone | Move | Ball;
+// Fields after the comment `// 0.2:` are optional, and absent from a source that does not use them.
+interface Player  { type: 'player';  x: number; y: number; label: string; team: PlayerColor; /* 0.2: */ note?: string; ghost?: boolean; key?: string; court?: number }
+interface Machine { type: 'machine'; x: number; y: number; angle: number; /* 0.2: */ key?: string; court?: number }
+interface Cone    { type: 'cone';    x: number; y: number; /* 0.2: */ label?: string; key?: string; court?: number }
+interface Zone    { type: 'zone';    x: number; y: number; w: number; h: number; label: string; /* 0.2: */ ghost?: boolean; key?: string; court?: number }
+interface Move    { type: 'move';    x1: number; y1: number; x2: number; y2: number; /* 0.2: */ color?: PathColor; key?: string; court?: number }
+interface Ball    { type: 'ball';    x1: number; y1: number; x2: number; y2: number; curve: boolean; bend: 1 | -1; n: number;
+                    /* 0.2: */ color?: PathColor; dash?: boolean; alt?: string; court?: number }
+// since 0.2
+interface Line    { type: 'line';    x1: number; y1: number; x2: number; y2: number; color?: PathColor; dash?: boolean; label?: string; key?: string; court?: number }
+interface Mark    { type: 'mark';    x: number; y: number; key: string; court?: number }
+interface LegendEntry { key?: string; color?: PathColor; text: string }
+interface Court   { label?: string; link?: string }
+
+type Item = Player | Machine | Cone | Zone | Move | Ball | Line | Mark;
 type ItemType = Item['type'];
 
 interface DrillSource {
@@ -368,6 +387,9 @@ interface DrillSource {
   view: CourtView;
   side: HalfSide;
   orient: Orientation;
+  showCaption?: boolean;   // since 0.2
+  courts?: Court[];        // since 0.2
+  legend?: LegendEntry[];  // since 0.2
   items: Item[];
 }
 
@@ -377,13 +399,14 @@ type ErrorKey = 'not_json' | 'not_an_object' | 'wrong_format' | 'unsupported_ver
   | 'title_too_long' | 'caption_too_long' | 'label_too_long' | 'bad_character' | 'bad_view' | 'bad_side'
   | 'bad_orient' | 'items_not_array' | 'too_many_items' | 'item_not_object' | 'unknown_item_type'
   | 'not_a_number' | 'out_of_bounds' | 'bad_size' | 'bad_angle' | 'bad_team' | 'bad_bend'
-  | 'bad_shot_number' | 'not_boolean' | 'no_svg_source' | 'bad_svg_source' | 'empty_input';
+  | 'bad_shot_number' | 'not_boolean' | 'bad_color' | 'bad_key' | 'bad_alt' | 'bad_court' | 'bad_courts'
+  | 'bad_legend' | 'no_svg_source' | 'bad_svg_source' | 'empty_input';
 
 interface RenderOptions { greyscale?: boolean }
 interface Rect { x: number; y: number; w: number; h: number }
 ```
 
-`DrillSource` is what a *validated* source looks like: every field present. What a document may leave out is in [format.md](format.md#the-document). `ParseError.path` is a JSON-pointer-like location such as `/items/3/x`, or `""` for the whole document. Each `ErrorKey` is explained in [format.md](format.md#error-keys).
+`DrillSource` is what a *validated* source looks like: every 0.1 field present, and the optional 0.2 fields only when they are set (see [the 0.2 additions](format.md#additions-in-02)). What a document may leave out is in [format.md](format.md#the-document). `ParseError.path` is a JSON-pointer-like location such as `/items/3/x`, or `""` for the whole document. Each `ErrorKey` is explained in [format.md](format.md#error-keys).
 
 ```ts
 import { parseSource, type DrillSource, type ErrorKey } from 'drillplot';
@@ -496,8 +519,9 @@ The editor's state and undo history, with no DOM in it, so it can be driven and 
 
 ```ts
 class DrillModel {
-  meta: Pick<DrillSource, 'title' | 'caption' | 'view' | 'side' | 'orient'>;
+  meta: Pick<DrillSource, 'title' | 'caption' | 'view' | 'side' | 'orient' | 'showCaption' | 'courts' | 'legend'>;
   items: EditorItem[];           // a source item plus an editor-only `id`
+  court: number;                 // since 0.2: the court new pieces go on (1 or more)
   undoStack: unknown[];
   redoStack: unknown[];
   onChange: (() => void) | undefined; // called after any change a user made
@@ -519,17 +543,20 @@ class DrillModel {
   delete(id: string): void;
   clear(): void;
   nudge(id: string, dx: number, dy: number): void;
-  addArrow(tool: 'drive' | 'drop' | 'move', x1: number, y1: number, x2: number, y2: number): EditorItem;
+  addArrow(tool: 'drive' | 'drop' | 'move' | 'line', x1: number, y1: number, x2: number, y2: number): EditorItem;
+  onCourt(): EditorItem[];
   shiftShot(id: string, dir: -1 | 1): void;
   renumber(): void;
 }
-// Kind = 'pA' | 'pB' | 'pC' | 'pD' | 'pCoach' | 'machine' | 'cone' | 'zone'
+// Kind = 'pA' | 'pB' | 'pC' | 'pD' | 'pCoach' | 'machine' | 'cone' | 'zone' | 'mark'
 ```
 
 | Method | Description |
 | --- | --- |
 | `add(kind, x, y)` | Adds a piece centered at `(x, y)` (snapped to a quarter foot and kept inside the bounds), as one undo step, and returns it. `pA` and `pB` are orange players labelled A and B, `pC` and `pD` blue players C and D, `pCoach` a black player labelled "Coach"; `zone` is 6 by 4 feet. |
-| `addArrow(tool, ...)` | Makes an arrow with its ends set and the next shot number (`'drive'` straight, `'drop'` curved, `'move'` a movement arrow) and returns it. It does not add it to `items`. |
+| `add(kind, x, y)` with `'mark'` | Since 0.2: a legend badge with the lowest whole-number key not yet used by a badge, a shot or a legend note. |
+| `addArrow(tool, ...)` | Makes an arrow with its ends set and the next shot number (`'drive'` straight, `'drop'` curved, `'move'` a movement arrow, `'line'` a plain line, since 0.2) and returns it. It does not add it to `items`. New pieces and arrows go on `court` when it is above 1. |
+| `onCourt()` | Since 0.2: the items on the court being edited (all of them when the diagram has no `courts`). |
 | `nudge(id, dx, dy)` | Moves a piece or whole arrow by feet, kept inside the bounds, as one undo step. |
 | `delete(id)`, `clear()` | Remove one piece or all of them (undoable). |
 | `shiftShot(id, dir)` | Swaps a ball path's number with the previous (`-1`) or next (`1`) shot. |

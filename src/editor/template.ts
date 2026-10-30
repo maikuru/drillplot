@@ -44,21 +44,6 @@ export const TEMPLATE = `
         <label class="check" for="show-caption"><input type="checkbox" id="show-caption"> Print the caption under the court</label>
       </section>
 
-      <section aria-labelledby="h-legend">
-        <h3 id="h-legend">Legend</h3>
-        <p class="small">Notes printed under the court. A note's key matches a badge on the court or a shot number; leave the key empty to show a color swatch instead.</p>
-        <div id="legend-rows" class="legend-rows"></div>
-        <button type="button" class="btn sm" id="legend-add" style="margin-top:8px">Add a note</button>
-      </section>
-
-      <section aria-labelledby="h-courts">
-        <h3 id="h-courts">Courts</h3>
-        <div class="field"><label for="courts-n">Courts in this diagram</label>
-          <select id="courts-n"><option value="1">One court</option><option value="2">Two courts</option><option value="3">Three courts</option><option value="4">Four courts</option></select>
-          <span class="small" id="courts-note"></span></div>
-        <div id="court-rows" class="legend-rows"></div>
-      </section>
-
       <section class="pal" aria-labelledby="h-add">
         <h3 id="h-add">Add to the court</h3>
         <div class="row" role="group" aria-label="Players">
@@ -134,6 +119,21 @@ export const TEMPLATE = `
         <p class="small" id="shots-note"></p>
         <button type="button" class="btn sm" id="renumber" style="margin-top:8px">Renumber shots</button>
       </section>
+      <section aria-labelledby="h-legend">
+        <h3 id="h-legend">Legend</h3>
+        <p class="small">Notes printed under the court. A note's key matches a badge on the court or a shot number; leave the key empty to show a color swatch instead.</p>
+        <div id="legend-rows" class="legend-rows"></div>
+        <button type="button" class="btn sm" id="legend-add" style="margin-top:8px">Add a note</button>
+      </section>
+
+      <section aria-labelledby="h-courts">
+        <h3 id="h-courts">Courts</h3>
+        <div class="field"><label for="courts-n">Courts in this diagram</label>
+          <select id="courts-n"><option value="1">One court</option><option value="2">Two courts</option><option value="3">Three courts</option><option value="4">Four courts</option></select>
+          <span class="small" id="courts-note"></span></div>
+        <div id="court-rows" class="legend-rows"></div>
+      </section>
+
       <p class="small">Shortcuts: Delete removes the selected piece. Ctrl or Cmd + Z undoes, with Shift to redo. Ctrl or Cmd + S saves. Arrow keys nudge a selected piece half a foot. With an arrow tool chosen, Enter on the court adds an arrow you can then adjust.</p>
     </div>
 
