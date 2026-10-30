@@ -15,6 +15,7 @@ export const TEMPLATE = `
       <option value="bottom">Bottom half</option>
       <option value="top">Top half</option>
     </select>
+    <select class="sel" id="court-pick" aria-label="Court being edited" hidden></select>
     <span class="sp"></span>
     <button type="button" class="btn sm" id="undo">Undo</button>
     <button type="button" class="btn sm" id="redo">Redo</button>
@@ -40,6 +41,22 @@ export const TEMPLATE = `
         <h3 id="h-details">Details</h3>
         <div class="field"><label for="title">Diagram title</label><input type="text" id="title" maxlength="120" autocomplete="off"></div>
         <div class="field" style="margin-top:8px"><label for="caption">Caption (optional)</label><textarea id="caption" maxlength="300"></textarea></div>
+        <label class="check" for="show-caption"><input type="checkbox" id="show-caption"> Print the caption under the court</label>
+      </section>
+
+      <section aria-labelledby="h-legend">
+        <h3 id="h-legend">Legend</h3>
+        <p class="small">Notes printed under the court. A note's key matches a badge on the court or a shot number; leave the key empty to show a color swatch instead.</p>
+        <div id="legend-rows" class="legend-rows"></div>
+        <button type="button" class="btn sm" id="legend-add" style="margin-top:8px">Add a note</button>
+      </section>
+
+      <section aria-labelledby="h-courts">
+        <h3 id="h-courts">Courts</h3>
+        <div class="field"><label for="courts-n">Courts in this diagram</label>
+          <select id="courts-n"><option value="1">One court</option><option value="2">Two courts</option><option value="3">Three courts</option><option value="4">Four courts</option></select>
+          <span class="small" id="courts-note"></span></div>
+        <div id="court-rows" class="legend-rows"></div>
       </section>
 
       <section class="pal" aria-labelledby="h-add">
@@ -55,6 +72,7 @@ export const TEMPLATE = `
           <button type="button" class="btn sm" data-kind="machine"><span class="dot sq"></span>Ball machine</button>
           <button type="button" class="btn sm" data-kind="cone"><span class="dot cone"></span>Cone</button>
           <button type="button" class="btn sm" data-kind="zone"><span class="dot zone"></span>Target zone</button>
+          <button type="button" class="btn sm" data-kind="mark"><span class="dot key">1</span>Legend badge</button>
         </div>
         <h3 style="margin-top:14px">Draw arrows</h3>
         <div class="row" role="group" aria-label="Arrow tools">
@@ -62,6 +80,7 @@ export const TEMPLATE = `
           <button type="button" class="btn sm" data-tool="drive" aria-pressed="false">Drive (straight)</button>
           <button type="button" class="btn sm" data-tool="drop" aria-pressed="false">Drop or lob (curved)</button>
           <button type="button" class="btn sm" data-tool="move" aria-pressed="false">Movement (dashed)</button>
+          <button type="button" class="btn sm" data-tool="line" aria-pressed="false">Line (no arrowhead)</button>
         </div>
         <p class="hint" id="hint" aria-live="polite"></p>
       </section>
@@ -72,9 +91,17 @@ export const TEMPLATE = `
         <div class="insp" id="insp" hidden>
           <strong id="insp-name" aria-live="polite"></strong>
           <div class="field" id="g-label"><label for="sel-label" id="sel-label-l">Label</label><input type="text" id="sel-label" maxlength="8" autocomplete="off"></div>
+          <div class="field" id="g-note"><label for="sel-note">Role under the disc (optional)</label><input type="text" id="sel-note" maxlength="16" autocomplete="off"></div>
           <div class="field" id="g-team"><label for="sel-team">Player color</label>
             <select id="sel-team"><option value="orange">Orange</option><option value="blue">Blue</option><option value="white">White</option><option value="black">Black</option></select>
             <span class="small">Four colors that stay apart for color-blind viewers and on a black and white printer.</span></div>
+          <label class="check" id="g-ghost"><input type="checkbox" id="sel-ghost"> <span id="sel-ghost-l">Dashed outline</span></label>
+          <div class="field" id="g-color"><label for="sel-color">Color</label>
+            <select id="sel-color"><option value="">Default</option><option value="yellow">Yellow</option><option value="white">White</option><option value="orange">Orange</option><option value="red">Red</option><option value="pink">Pink</option><option value="green">Green</option><option value="black">Black</option></select></div>
+          <label class="check" id="g-dash"><input type="checkbox" id="sel-dash"> Dashed (cooperative or optional)</label>
+          <div class="field" id="g-alt"><label for="sel-alt">Either-or choice</label>
+            <select id="sel-alt"><option value="">No: a shot in the sequence</option><option value="a">Choice a</option><option value="b">Choice b</option><option value="c">Choice c</option><option value="d">Choice d</option></select>
+            <span class="small">Give two paths the same shot number and different letters to show one or the other.</span></div>
           <div id="g-ball">
             <label class="check"><input type="checkbox" id="sel-curve"> Curved (drop or lob)</label>
             <div class="row">
@@ -83,6 +110,7 @@ export const TEMPLATE = `
               <button type="button" class="btn sm" id="sel-later">Later shot</button>
             </div>
           </div>
+          <div class="field" id="g-key"><label for="sel-key">Legend badge (optional, up to 3 characters)</label><input type="text" id="sel-key" maxlength="3" autocomplete="off"></div>
           <div class="field" id="g-aim"><label for="sel-aim">Aim: <span id="sel-aim-v"></span> degrees</label><input type="range" id="sel-aim" min="0" max="359" step="1"></div>
           <div class="row" id="g-zone">
             <div class="field"><label for="sel-w">Width (ft)</label><input type="number" id="sel-w" min="1" max="20" step="0.5"></div>

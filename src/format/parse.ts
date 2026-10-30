@@ -1,4 +1,4 @@
-import { BOUNDS, FORMAT_NAME, FORMAT_VERSION, LEGACY_TEAMS, LIMITS, PLAYER_COLORS } from './limits.js';
+import { BOUNDS, FORMAT_NAME, FORMAT_VERSION, LEGACY_TEAMS, LIMITS, PATH_COLORS, PLAYER_COLORS } from './limits.js';
 import type {
   Ball,
   DrillSource,
@@ -6,6 +6,7 @@ import type {
   Item,
   ParseError,
   ParseResult,
+  PathColor,
   PlayerColor,
 } from './types.js';
 
@@ -47,6 +48,12 @@ const MESSAGES: Record<ErrorKey, string> = {
   bad_bend: 'The bend must be 1 or -1.',
   bad_shot_number: `A shot number must be a whole number from 1 to ${LIMITS.maxShot}.`,
   not_boolean: 'This value must be true or false.',
+  bad_color: `The color must be one of ${PATH_COLORS.map((c) => `"${c}"`).join(', ')}.`,
+  bad_key: `A legend key must be 1 to ${LIMITS.keyLength} characters of text on one line.`,
+  bad_alt: 'An alternative must be one lower-case letter, a to z.',
+  bad_court: 'The court must be a whole number from 1 to the number of courts.',
+  bad_courts: `The courts must be a list of ${LIMITS.courts.min} to ${LIMITS.courts.max} objects.`,
+  bad_legend: `The legend must be a list of at most ${LIMITS.legendEntries} notes, each an object with text.`,
   no_svg_source: 'That SVG has no diagram source in it. Only SVGs made by drillplot can be reopened.',
   bad_svg_source: 'The source inside that SVG is damaged.',
   empty_input: 'Paste an SVG or JSON first.',
@@ -103,7 +110,55 @@ function team(c: Collector, v: unknown, path: string): PlayerColor {
   return 'orange';
 }
 
-function item(c: Collector, raw: unknown, path: string): Item | undefined {
+/* Optional fields, since 0.2. Each is left out of the result when absent, so a 0.1 document normalizes as before. */
+
+function optText(c: Collector, raw: Record<string, unknown>, k: string, path: string, max: number): string | undefined {
+  if (raw[k] === undefined) return undefined;
+  const t = text(c, raw[k], `${path}/${k}`, max, 'label_too_long');
+  return t === '' ? undefined : t;
+}
+
+function optFlag(c: Collector, raw: Record<string, unknown>, k: string, path: string): true | undefined {
+  const v = raw[k];
+  if (v === undefined) return undefined;
+  if (typeof v !== 'boolean') c.add('not_boolean', `${path}/${k}`);
+  return v === true ? true : undefined;
+}
+
+function optColor(c: Collector, raw: Record<string, unknown>, path: string): PathColor | undefined {
+  const v = raw['color'];
+  if (v === undefined) return undefined;
+  if (typeof v === 'string' && (PATH_COLORS as readonly string[]).includes(v)) return v as PathColor;
+  c.add('bad_color', `${path}/color`);
+  return undefined;
+}
+
+/** A legend key: 1 to 3 characters, one line. */
+function key(c: Collector, v: unknown, path: string): string | undefined {
+  if (typeof v === 'string' && v.trim() !== '' && len(v) <= LIMITS.keyLength && !BAD_ONE_LINE.test(v)) return v;
+  c.add('bad_key', path);
+  return undefined;
+}
+
+function optKey(c: Collector, raw: Record<string, unknown>, path: string): string | undefined {
+  return raw['key'] === undefined ? undefined : key(c, raw['key'], `${path}/key`);
+}
+
+function optCourt(c: Collector, raw: Record<string, unknown>, path: string, courts: number): number | undefined {
+  const v = raw['court'];
+  if (v === undefined) return undefined;
+  if (typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= courts) return v;
+  c.add('bad_court', `${path}/court`);
+  return undefined;
+}
+
+/** Copies the optional fields that are set onto an item, in the order given. */
+function withExtras<T extends Item>(it: T, extras: Record<string, unknown>): T {
+  for (const [k, v] of Object.entries(extras)) if (v !== undefined) (it as unknown as Record<string, unknown>)[k] = v;
+  return it;
+}
+
+function item(c: Collector, raw: unknown, path: string, courts = 1): Item | undefined {
   if (!isObj(raw)) {
     c.add('item_not_object', path);
     return undefined;
@@ -116,7 +171,10 @@ function item(c: Collector, raw: unknown, path: string): Item | undefined {
       const y = num(c, raw['y'], `${path}/y`, Y);
       const label = text(c, raw['label'], `${path}/label`, LIMITS.playerLabelLength, 'label_too_long');
       const t = team(c, raw['team'], `${path}/team`);
-      out = { type: 'player', x: x ?? 0, y: y ?? 0, label, team: t };
+      out = withExtras(
+        { type: 'player', x: x ?? 0, y: y ?? 0, label, team: t },
+        { note: optText(c, raw, 'note', path, LIMITS.noteLength), ghost: optFlag(c, raw, 'ghost', path), key: optKey(c, raw, path) },
+      );
       break;
     }
     case 'machine': {
@@ -130,13 +188,13 @@ function item(c: Collector, raw: unknown, path: string): Item | undefined {
         else if (rawAngle < 0 || rawAngle >= 360) c.add('bad_angle', `${path}/angle`);
         else a = round2(rawAngle) % 360;
       }
-      out = { type: 'machine', x: x ?? 0, y: y ?? 0, angle: a };
+      out = withExtras({ type: 'machine', x: x ?? 0, y: y ?? 0, angle: a }, { key: optKey(c, raw, path) });
       break;
     }
     case 'cone': {
       const x = num(c, raw['x'], `${path}/x`, X);
       const y = num(c, raw['y'], `${path}/y`, Y);
-      out = { type: 'cone', x: x ?? 0, y: y ?? 0 };
+      out = withExtras({ type: 'cone', x: x ?? 0, y: y ?? 0 }, { label: optText(c, raw, 'label', path, LIMITS.coneLabelLength), key: optKey(c, raw, path) });
       break;
     }
     case 'zone': {
@@ -145,18 +203,33 @@ function item(c: Collector, raw: unknown, path: string): Item | undefined {
       const w = num(c, raw['w'], `${path}/w`, [LIMITS.zoneWidth.min, LIMITS.zoneWidth.max], 'bad_size');
       const h = num(c, raw['h'], `${path}/h`, [LIMITS.zoneHeight.min, LIMITS.zoneHeight.max], 'bad_size');
       const label = text(c, raw['label'], `${path}/label`, LIMITS.zoneLabelLength, 'label_too_long');
-      out = { type: 'zone', x: x ?? 0, y: y ?? 0, w: w ?? 1, h: h ?? 1, label };
+      out = withExtras({ type: 'zone', x: x ?? 0, y: y ?? 0, w: w ?? 1, h: h ?? 1, label }, { ghost: optFlag(c, raw, 'ghost', path), key: optKey(c, raw, path) });
+      break;
+    }
+    case 'mark': {
+      const x = num(c, raw['x'], `${path}/x`, X);
+      const y = num(c, raw['y'], `${path}/y`, Y);
+      const k = key(c, raw['key'], `${path}/key`);
+      out = { type: 'mark', x: x ?? 0, y: y ?? 0, key: k ?? '' };
       break;
     }
     case 'move':
-    case 'ball': {
+    case 'ball':
+    case 'line': {
       const x1 = num(c, raw['x1'], `${path}/x1`, X);
       const y1 = num(c, raw['y1'], `${path}/y1`, Y);
       const x2 = num(c, raw['x2'], `${path}/x2`, X);
       const y2 = num(c, raw['y2'], `${path}/y2`, Y);
       const pts = { x1: x1 ?? 0, y1: y1 ?? 0, x2: x2 ?? 0, y2: y2 ?? 0 };
       if (raw['type'] === 'move') {
-        out = { type: 'move', ...pts };
+        out = withExtras({ type: 'move', ...pts }, { color: optColor(c, raw, path), key: optKey(c, raw, path) });
+        break;
+      }
+      if (raw['type'] === 'line') {
+        out = withExtras(
+          { type: 'line', ...pts },
+          { color: optColor(c, raw, path), dash: optFlag(c, raw, 'dash', path), label: optText(c, raw, 'label', path, LIMITS.lineLabelLength), key: optKey(c, raw, path) },
+        );
         break;
       }
       let curve = false;
@@ -172,15 +245,50 @@ function item(c: Collector, raw: unknown, path: string): Item | undefined {
       let n = 1;
       if (typeof raw['n'] === 'number' && Number.isInteger(raw['n']) && raw['n'] >= 1 && raw['n'] <= LIMITS.maxShot) n = raw['n'];
       else c.add('bad_shot_number', `${path}/n`);
+      let alt: string | undefined;
+      if (raw['alt'] !== undefined) {
+        if (typeof raw['alt'] === 'string' && /^[a-z]$/.test(raw['alt'])) alt = raw['alt'];
+        else c.add('bad_alt', `${path}/alt`);
+      }
       const ball: Ball = { type: 'ball', ...pts, curve, bend, n };
-      out = ball;
+      out = withExtras(ball, { color: optColor(c, raw, path), dash: optFlag(c, raw, 'dash', path), alt });
       break;
     }
     default:
       c.add('unknown_item_type', `${path}/type`);
       return undefined;
   }
+  const court = optCourt(c, raw, path, courts);
+  if (out && court !== undefined) out.court = court;
   return c.errors.length > before ? undefined : out;
+}
+
+function courtList(c: Collector, v: unknown): DrillSource['courts'] {
+  if (v === undefined) return undefined;
+  if (!Array.isArray(v) || v.length < LIMITS.courts.min || v.length > LIMITS.courts.max || !v.every(isObj)) {
+    c.add('bad_courts', '/courts');
+    return undefined;
+  }
+  return v.map((r, i) => {
+    const label = text(c, r['label'], `/courts/${i}/label`, LIMITS.courtLabelLength, 'label_too_long');
+    const link = text(c, r['link'], `/courts/${i}/link`, LIMITS.courtLinkLength, 'label_too_long');
+    return { ...(label ? { label } : {}), ...(link ? { link } : {}) };
+  });
+}
+
+function legendList(c: Collector, v: unknown): DrillSource['legend'] {
+  if (v === undefined) return undefined;
+  if (!Array.isArray(v) || v.length > LIMITS.legendEntries || !v.every(isObj)) {
+    c.add('bad_legend', '/legend');
+    return undefined;
+  }
+  return v.map((r, i) => {
+    const k = optKey(c, r, `/legend/${i}`);
+    const color = optColor(c, r, `/legend/${i}`);
+    // text is required: an absent one is not text
+    const t = text(c, r['text'] ?? null, `/legend/${i}/text`, LIMITS.legendTextLength, 'label_too_long');
+    return { ...(k !== undefined ? { key: k } : {}), ...(color ? { color } : {}), text: t };
+  });
 }
 
 /**
@@ -219,17 +327,24 @@ export function parseSource(input: unknown): ParseResult {
     if (value['orient'] === 'portrait' || value['orient'] === 'landscape') orient = value['orient'];
     else c.add('bad_orient', '/orient');
   }
+  const showCaption = optFlag(c, value, 'showCaption', '');
+  const courts = courtList(c, value['courts']);
+  const legend = legendList(c, value['legend']);
   const items: Item[] = [];
   const raw = value['items'];
   if (!Array.isArray(raw)) c.add('items_not_array', '/items');
   else if (raw.length > LIMITS.maxItems) c.add('too_many_items', '/items');
   else
     raw.forEach((r, i) => {
-      const it = item(c, r, `/items/${i}`);
+      const it = item(c, r, `/items/${i}`, courts?.length ?? 1);
       if (it) items.push(it);
     });
   if (c.errors.length) return { ok: false, errors: c.errors };
-  return { ok: true, source: { format: FORMAT_NAME, version: FORMAT_VERSION, title, caption, view, side, orient, items } };
+  const source: DrillSource = { format: FORMAT_NAME, version: FORMAT_VERSION, title, caption, view, side, orient, items };
+  if (showCaption) source.showCaption = true;
+  if (courts) source.courts = courts;
+  if (legend) source.legend = legend;
+  return { ok: true, source };
 }
 
 function fail(key: ErrorKey, path: string): ParseResult {

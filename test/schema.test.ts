@@ -30,6 +30,45 @@ const samples: Array<[string, unknown, boolean]> = [
   ['astral characters', one({ type: 'player', x: 1, y: 1, label: '🎾'.repeat(8) }), true],
   ['200 items', { ...base, items: Array.from({ length: LIMITS.maxItems }, () => ({ type: 'cone', x: 1, y: 1 })) }, true],
 
+  // since 0.2
+  ['visible caption', { ...base, caption: 'c', showCaption: true }, true],
+  ['legend', { ...base, legend: [{ key: '1', text: 'First note' }, { key: 'T1', text: long(100) }] }, true],
+  ['empty legend', { ...base, legend: [] }, true],
+  ['legend swatch and plain notes', { ...base, legend: [{ color: 'red', text: 'Space left open' }, { text: 'A plain note' }] }, true],
+  ['legend swatch of an unknown color', { ...base, legend: [{ color: 'purple', text: 'x' }] }, false],
+  ['two courts', { ...base, courts: [{ label: 'Court 1', link: 'Winner moves up' }, { label: 'Court 2' }], items: [{ type: 'cone', x: 1, y: 1, court: 2 }] }, true],
+  ['court 1 without courts', one({ type: 'cone', x: 1, y: 1, court: 1 }), true],
+  ['player note, ghost and key', one({ type: 'player', x: 1, y: 1, note: long(16), ghost: true, key: '12' }), true],
+  ['labelled cone', one({ type: 'cone', x: 1, y: 1, label: 'T1', key: 'a' }), true],
+  ['ghost zone', one({ type: 'zone', x: 1, y: 1, w: 3, h: 3, ghost: true }), true],
+  ['colored dashed alternative ball', one({ ...ball, color: 'pink', dash: true, alt: 'b' }), true],
+  ['colored move with key', one({ type: 'move', x1: 1, y1: 1, x2: 2, y2: 2, color: 'orange', key: '2' }), true],
+  ['line', one({ type: 'line', x1: 0, y1: 33, x2: 20, y2: 33, color: 'yellow', dash: true, label: 'Split step', key: '3' }), true],
+  ['bare line', one({ type: 'line', x1: 0, y1: 33, x2: 20, y2: 33 }), true],
+  ['mark', one({ type: 'mark', x: 5, y: 5, key: '4' }), true],
+
+  ['showCaption as text', { ...base, showCaption: 'yes' }, false],
+  ['legend not a list', { ...base, legend: { key: '1' } }, false],
+  ['21 legend notes', { ...base, legend: Array.from({ length: 21 }, () => ({ key: '1', text: 'x' })) }, false],
+  ['legend note without text', { ...base, legend: [{ key: '1' }] }, false],
+  ['legend key too long', { ...base, legend: [{ key: '1234', text: 'x' }] }, false],
+  ['legend key blank', { ...base, legend: [{ key: ' ', text: 'x' }] }, false],
+  ['legend text too long', { ...base, legend: [{ key: '1', text: long(101) }] }, false],
+  ['no courts', { ...base, courts: [] }, false],
+  ['five courts', { ...base, courts: [{}, {}, {}, {}, {}] }, false],
+  ['court label too long', { ...base, courts: [{ label: long(25) }, {}] }, false],
+  ['court 0', one({ type: 'cone', x: 1, y: 1, court: 0 }), false],
+  ['court 1.5', one({ type: 'cone', x: 1, y: 1, court: 1.5 }), false],
+  ['player note too long', one({ type: 'player', x: 1, y: 1, note: long(17) }), false],
+  ['ghost as text', one({ type: 'player', x: 1, y: 1, ghost: 'yes' }), false],
+  ['cone label too long', one({ type: 'cone', x: 1, y: 1, label: long(7) }), false],
+  ['unknown path color', one({ ...ball, color: 'purple' }), false],
+  ['alt in capitals', one({ ...ball, alt: 'A' }), false],
+  ['alt of two letters', one({ ...ball, alt: 'ab' }), false],
+  ['mark without a key', one({ type: 'mark', x: 5, y: 5 }), false],
+  ['empty key', one({ type: 'cone', x: 1, y: 1, key: '' }), false],
+  ['line missing end', one({ type: 'line', x1: 0, y1: 33, x2: 20 }), false],
+
   ['not an object', [1], false],
   ['wrong format', { ...base, format: 'x' }, false],
   ['future version', { ...base, version: 2 }, false],
@@ -82,5 +121,11 @@ describe('JSON Schema and validator agree', () => {
   it('compiles as shipped, with a real $id', () => {
     expect((schema as { $id: string }).$id).toBe('https://maikuru.github.io/drillplot/schema/drill-diagram.v1.schema.json');
     expect(() => new Ajv2020({ strict: true }).compile(schema)).not.toThrow();
+  });
+
+  it('the reader alone checks a court number against the number of courts', () => {
+    const doc = { ...base, courts: [{}, {}], items: [{ type: 'cone', x: 1, y: 1, court: 3 }] };
+    expect(validate(doc)).toBe(true);
+    expect(parseSource(doc).ok === false && parseSource(doc)).toMatchObject({ errors: [{ key: 'bad_court', path: '/items/0/court' }] });
   });
 });

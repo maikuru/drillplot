@@ -1,17 +1,17 @@
-import { LIMITS } from '../format/limits.js';
+import { LIMITS, PATH_COLORS as PATH_COLOR_NAMES } from '../format/limits.js';
 import { parseText } from '../format/open.js';
 import { parseSource } from '../format/parse.js';
 import { ballItems, hasShotGap } from '../format/shots.js';
-import type { DrillSource, Item, ParseError, ParseResult } from '../format/types.js';
+import type { DrillSource, Item, ParseError, ParseResult, PathColor } from '../format/types.js';
 import { arrowGeom, countOffView, courtView, drawOrder, viewBox } from '../render/geometry.js';
 import { courtMarkup, esc, itemMarkup } from '../render/markup.js';
 import { renderSvg } from '../render/svg.js';
 import { stringifySource } from '../format/open.js';
-import { clamp, clampX, clampY, DrillModel, KIND_NAME, moveBy, round2, snapFt, type EditorItem, type Kind } from './model.js';
+import { clamp, clampX, clampY, DrillModel, KIND_NAME, moveBy, nextKey, round2, snapFt, type EditorItem, type Kind } from './model.js';
 import { CSS } from './style.js';
 import { TEMPLATE } from './template.js';
 
-type Tool = 'select' | 'drive' | 'drop' | 'move';
+type Tool = 'select' | 'drive' | 'drop' | 'move' | 'line';
 type Drag =
   | { mode: 'move'; before: ReturnType<DrillModel['snap']>; p0: { x: number; y: number }; orig: EditorItem }
   | { mode: 'draw'; before: ReturnType<DrillModel['snap']>; id: string }
@@ -32,21 +32,33 @@ export interface SourceErrorDetail {
 function itemName(it: Item): string {
   switch (it.type) {
     case 'player':
-      return 'Player ' + (it.label || '(no label)');
+      return (it.ghost ? 'Start position ' : 'Player ') + (it.label || '(no label)') + (it.note ? ', ' + it.note : '');
     case 'machine':
       return 'Ball machine';
     case 'cone':
-      return 'Cone';
+      return 'Cone' + (it.label ? ' ' + it.label : '');
     case 'zone':
-      return 'Target zone' + (it.label ? ' ' + it.label : '');
+      return (it.ghost ? 'Open space' : 'Target zone') + (it.label ? ' ' + it.label : '');
     case 'move':
       return 'Movement arrow';
     case 'ball':
-      return (it.curve ? 'Drop or lob ' : 'Drive ') + it.n;
+      return (it.curve ? 'Drop or lob ' : 'Drive ') + it.n + (it.alt ?? '');
+    case 'line':
+      return 'Line' + (it.label ? ' ' + it.label : '');
+    case 'mark':
+      return 'Legend badge ' + it.key;
   }
 }
 
-const POINT_KINDS = new Set(['player', 'machine', 'cone', 'zone']);
+/** Sets an optional field, or removes it when empty or false, so the source carries no empty extras. */
+function setOpt<T extends object, K extends keyof T>(obj: T, k: K, v: T[K] | '' | false | undefined): void {
+  if (v === '' || v === false || v === undefined) delete obj[k];
+  else obj[k] = v as T[K];
+}
+
+const POINT_KINDS = new Set(['player', 'machine', 'cone', 'zone', 'mark']);
+const KEYED = new Set(['player', 'machine', 'cone', 'zone', 'move', 'line', 'mark']);
+const LABEL_MAX: Partial<Record<Item['type'], number>> = { player: LIMITS.playerLabelLength, zone: LIMITS.zoneLabelLength, cone: LIMITS.coneLabelLength, line: LIMITS.lineLabelLength };
 
 /**
  * <drillplot-editor>: draw a pickleball drill on a to-scale court.
@@ -70,6 +82,8 @@ export class DrillplotEditor extends HTMLElement {
   private quiet = 0;
   private pickHtml = '';
   private labelBefore: ReturnType<DrillModel['snap']> | null = null;
+  private legendShape = '';
+  private courtShape = '';
   private aimBefore: ReturnType<DrillModel['snap']> | null = null;
   private readonly shadow: ShadowRoot;
   private stage: SVGSVGElement;
@@ -190,7 +204,7 @@ export class DrillplotEditor extends HTMLElement {
     this.stage.innerHTML =
       world +
       courtMarkup(courtView(m.meta.view, m.meta.side), ctx) +
-      drawOrder(m.items)
+      drawOrder(m.onCourt())
         .map((it) => `<g class="piece" data-id="${it.id}">${itemMarkup(it, ctx)}${this.hit(it)}</g>`)
         .join('') +
       `<g>${this.overlay()}</g></g>`;
@@ -199,6 +213,7 @@ export class DrillplotEditor extends HTMLElement {
   }
 
   private hit(it: Item): string {
+    if (it.type === 'line') return `<path d="M${it.x1} ${it.y1}L${it.x2} ${it.y2}" fill="none" stroke="transparent" stroke-width="2.4" pointer-events="stroke"/>`;
     if (it.type !== 'move' && it.type !== 'ball') return '';
     return `<path d="${arrowGeom(it).d}" fill="none" stroke="transparent" stroke-width="2.4" pointer-events="stroke"/>`;
   }
@@ -217,6 +232,8 @@ export class DrillplotEditor extends HTMLElement {
         return `<circle class="sel-ring" cx="${it.x}" cy="${it.y}" r="2.3"/>`;
       case 'cone':
         return `<circle class="sel-ring" cx="${it.x}" cy="${it.y}" r="1.5"/>`;
+      case 'mark':
+        return `<circle class="sel-ring" cx="${it.x}" cy="${it.y}" r="1.4"/>`;
       case 'zone':
         return `<rect class="sel-ring" x="${it.x - 0.2}" y="${it.y - 0.2}" width="${it.w + 0.4}" height="${it.h + 0.4}"/>` + H('corner', it.x + it.w, it.y + it.h, true);
       default: {
@@ -252,7 +269,7 @@ export class DrillplotEditor extends HTMLElement {
     half.options[0]!.textContent = this.landscape ? 'Right half' : 'Bottom half';
     half.options[1]!.textContent = this.landscape ? 'Left half' : 'Top half';
 
-    const off = countOffView({ view: meta.view, side: meta.side, items: m.items });
+    const off = countOffView({ view: meta.view, side: meta.side, items: m.onCourt() });
     this.setText('offview', off ? `${off} piece${off === 1 ? ' is' : 's are'} outside this view` : '');
     this.setText('scale', meta.view === 'full'
         ? 'Drawn to scale: the court is 20 by 44 feet.'
@@ -270,12 +287,14 @@ export class DrillplotEditor extends HTMLElement {
           ? 'Drag on the court from the hit to the landing spot. The arrow curves, like a drop or a lob.'
           : this.tool === 'move'
             ? 'Drag to show where a player moves. Dashed arrow.'
+            : this.tool === 'line'
+              ? 'Drag to draw a plain line, such as a line to split-step on.'
             : 'Drag a piece to move it. Drag the white handles to reshape an arrow or resize a zone. Drag a button above onto the court to add a piece.');
 
     const pick = this.$('pick') as HTMLSelectElement;
     const pickHtml =
-      `<option value="">${m.items.length ? 'Choose a piece' : 'Nothing on the court yet'}</option>` +
-      drawOrder(m.items)
+      `<option value="">${m.onCourt().length ? 'Choose a piece' : 'Nothing on the court yet'}</option>` +
+      drawOrder(m.onCourt())
         .map((i) => `<option value="${i.id}">${esc(itemName(i))}</option>`)
         .join('');
     if (pickHtml !== this.pickHtml) {
@@ -285,20 +304,37 @@ export class DrillplotEditor extends HTMLElement {
     pick.value = this.sel ?? '';
     this.setIfIdle('title', m.meta.title);
     this.setIfIdle('caption', m.meta.caption);
+    this.input('show-caption').checked = !!meta.showCaption;
+    this.syncLegend();
+    this.syncCourts();
 
     this.$('insp').hidden = !it;
     if (it) {
       this.setText('insp-name', itemName(it));
-      this.$('g-label').hidden = !(it.type === 'player' || it.type === 'zone');
-      this.$('sel-label-l').textContent = it.type === 'zone' ? 'Zone label (optional)' : 'Label';
-      this.input('sel-label').maxLength = it.type === 'zone' ? LIMITS.zoneLabelLength : LIMITS.playerLabelLength;
+      const labelMax = LABEL_MAX[it.type];
+      this.$('g-label').hidden = labelMax === undefined;
+      this.$('sel-label-l').textContent = it.type === 'player' ? 'Label' : it.type === 'zone' ? 'Zone label (optional)' : it.type === 'cone' ? 'Cone name (optional), such as T1' : 'Line label (optional)';
+      if (labelMax !== undefined) this.input('sel-label').maxLength = labelMax;
       this.$('g-team').hidden = it.type !== 'player';
+      this.$('g-note').hidden = it.type !== 'player';
+      this.$('g-ghost').hidden = !(it.type === 'player' || it.type === 'zone');
+      this.$('sel-ghost-l').textContent = it.type === 'zone' ? 'Space left open (outline only)' : 'Start position (dashed ring)';
+      this.$('g-color').hidden = !(it.type === 'ball' || it.type === 'move' || it.type === 'line');
+      this.$('g-dash').hidden = !(it.type === 'ball' || it.type === 'line');
+      this.$('g-alt').hidden = it.type !== 'ball';
+      this.$('g-key').hidden = !KEYED.has(it.type);
+      if (it.type === 'player') this.setIfIdle('sel-note', it.note ?? '');
+      if (it.type === 'player' || it.type === 'zone') this.input('sel-ghost').checked = !!it.ghost;
+      if (it.type === 'ball' || it.type === 'move' || it.type === 'line') (this.$('sel-color') as HTMLSelectElement).value = it.color ?? '';
+      if (it.type === 'ball' || it.type === 'line') this.input('sel-dash').checked = !!it.dash;
+      if (it.type === 'ball') (this.$('sel-alt') as HTMLSelectElement).value = it.alt ?? '';
+      if (it.type !== 'ball') this.setIfIdle('sel-key', it.key ?? '');
       this.$('g-ball').hidden = it.type !== 'ball';
       this.$('g-aim').hidden = it.type !== 'machine';
       this.$('g-zone').hidden = it.type !== 'zone';
       this.$('g-pos').hidden = !POINT_KINDS.has(it.type);
       this.$('g-pos2').hidden = POINT_KINDS.has(it.type);
-      if (it.type === 'player' || it.type === 'zone') this.setIfIdle('sel-label', it.label);
+      if (it.type === 'player' || it.type === 'zone' || it.type === 'cone' || it.type === 'line') this.setIfIdle('sel-label', it.label ?? '');
       if (it.type === 'player') (this.$('sel-team') as HTMLSelectElement).value = it.team;
       if (it.type === 'ball') this.input('sel-curve').checked = it.curve;
       if (it.type === 'machine') {
@@ -327,6 +363,71 @@ export class DrillplotEditor extends HTMLElement {
         ? 'Numbers skip a shot. Renumber to close the gap.'
         : `${balls.length} shot${balls.length === 1 ? '' : 's'}, numbered 1 to ${balls.length}.`);
     (this.$('renumber') as HTMLButtonElement).disabled = !balls.length;
+  }
+
+  /** The legend editor: rows are rebuilt only when their number changes, so typing keeps its focus. */
+  private syncLegend(): void {
+    const legend = this.model.meta.legend ?? [];
+    const shape = String(legend.length);
+    const box = this.$('legend-rows');
+    if (shape !== this.legendShape) {
+      this.legendShape = shape;
+      const colors = '<option value="">No swatch</option>' + PATH_COLOR_NAMES.map((c) => `<option value="${c}">${c[0]!.toUpperCase()}${c.slice(1)} swatch</option>`).join('');
+      box.innerHTML = legend
+        .map(
+          (_, i) =>
+            `<div class="legend-row" data-i="${i}">` +
+            `<div class="field"><label for="lg-key-${i}">Key</label><input type="text" id="lg-key-${i}" data-f="key" maxlength="${LIMITS.keyLength}" autocomplete="off"></div>` +
+            `<div class="field"><label for="lg-text-${i}">Note ${i + 1}</label><input type="text" id="lg-text-${i}" data-f="text" maxlength="${LIMITS.legendTextLength}" autocomplete="off"></div>` +
+            `<button type="button" class="btn sm" data-remove aria-label="Remove note ${i + 1}">Remove</button>` +
+            `<div class="field wide"><label class="sr" for="lg-color-${i}">Swatch for note ${i + 1}</label><select id="lg-color-${i}" data-f="color">${colors}</select></div>` +
+            '</div>',
+        )
+        .join('');
+    }
+    legend.forEach((e, i) => {
+      this.setIfIdle(`lg-key-${i}`, e.key ?? '');
+      this.setIfIdle(`lg-text-${i}`, e.text);
+      const sel = this.$(`lg-color-${i}`) as HTMLSelectElement;
+      sel.value = e.color ?? '';
+      sel.disabled = !!e.key;
+    });
+    (this.$('legend-add') as HTMLButtonElement).disabled = legend.length >= LIMITS.legendEntries;
+  }
+
+  /** The courts editor and the toolbar's court picker. */
+  private syncCourts(): void {
+    const m = this.model;
+    const courts = m.meta.courts;
+    const n = courts?.length ?? 1;
+    const inUse = m.items.reduce((hi, it) => Math.max(hi, it.court ?? 1), 1);
+    const count = this.$('courts-n') as HTMLSelectElement;
+    count.value = String(n);
+    [...count.options].forEach((o) => (o.disabled = +o.value < inUse));
+    this.setText('courts-note', inUse > 1 ? `Court ${inUse} has pieces on it: delete them to have fewer courts.` : '');
+    const pick = this.$('court-pick') as HTMLSelectElement;
+    pick.hidden = !courts;
+    const box = this.$('court-rows');
+    const shape = String(courts ? n : 0);
+    if (shape !== this.courtShape) {
+      this.courtShape = shape;
+      box.innerHTML = (courts ?? [])
+        .map(
+          (_, i) =>
+            `<div class="legend-row" data-i="${i}">` +
+            `<div class="field wide"><label for="ct-label-${i}">Court ${i + 1} heading</label><input type="text" id="ct-label-${i}" data-f="label" maxlength="${LIMITS.courtLabelLength}" autocomplete="off"></div>` +
+            (i < n - 1 ? `<div class="field wide"><label for="ct-link-${i}">Between court ${i + 1} and ${i + 2}</label><input type="text" id="ct-link-${i}" data-f="link" maxlength="${LIMITS.courtLinkLength}" autocomplete="off"></div>` : '') +
+            '</div>',
+        )
+        .join('');
+    }
+    (courts ?? []).forEach((ct, i) => {
+      this.setIfIdle(`ct-label-${i}`, ct.label ?? '');
+      if (i < n - 1) this.setIfIdle(`ct-link-${i}`, ct.link ?? '');
+    });
+    const opts = (courts ?? []).map((ct, i) => `<option value="${i + 1}">${esc(`Court ${i + 1}${ct.label ? ': ' + ct.label : ''}`)}</option>`).join('');
+    if (pick.innerHTML !== opts) pick.innerHTML = opts;
+    pick.value = String(m.court);
   }
 
   /* ---------- court coordinates ---------- */
@@ -627,10 +728,10 @@ export class DrillplotEditor extends HTMLElement {
     });
     label.addEventListener('input', () => {
       const it = cur();
-      if (it && (it.type === 'player' || it.type === 'zone')) {
-        it.label = label.value;
-        this.render();
-      }
+      if (it && (it.type === 'player' || it.type === 'zone')) it.label = label.value;
+      else if (it && (it.type === 'cone' || it.type === 'line')) setOpt(it, 'label', label.value);
+      else return;
+      this.render();
     });
     label.addEventListener('change', () => {
       if (this.labelBefore && m.record(this.labelBefore)) this.emitChange();
@@ -704,6 +805,118 @@ export class DrillplotEditor extends HTMLElement {
       ),
     );
     this.$('renumber').addEventListener('click', () => m.renumber());
+
+    /* 0.2 fields: text fields record one undo step when they lose focus, like the label */
+    const textField = (id: string, apply: (it: EditorItem, v: string) => void): void => {
+      const el = this.input(id);
+      let before: ReturnType<DrillModel['snap']> | null = null;
+      el.addEventListener('focus', () => {
+        before = m.snap();
+      });
+      el.addEventListener('input', () => {
+        const it = cur();
+        if (!it) return;
+        apply(it, el.value);
+        this.render();
+      });
+      el.addEventListener('change', () => {
+        if (before && m.record(before)) this.emitChange();
+        before = null;
+        this.render();
+      });
+    };
+    textField('sel-note', (it, v) => it.type === 'player' && setOpt(it, 'note', v));
+    textField('sel-key', (it, v) => {
+      if (it.type === 'mark') {
+        if (v.trim()) it.key = v; // a badge always has a key
+      } else if (it.type !== 'ball') setOpt(it, 'key', v.trim() ? v : '');
+    });
+    this.$('sel-ghost').addEventListener('change', (e) =>
+      m.act(() => {
+        const it = cur();
+        if (it?.type === 'player' || it?.type === 'zone') setOpt(it, 'ghost', (e.target as HTMLInputElement).checked);
+      }),
+    );
+    this.$('sel-color').addEventListener('change', (e) =>
+      m.act(() => {
+        const it = cur();
+        if (it?.type === 'ball' || it?.type === 'move' || it?.type === 'line') setOpt(it, 'color', (e.target as HTMLSelectElement).value as PathColor | '');
+      }),
+    );
+    this.$('sel-dash').addEventListener('change', (e) =>
+      m.act(() => {
+        const it = cur();
+        if (it?.type === 'ball' || it?.type === 'line') setOpt(it, 'dash', (e.target as HTMLInputElement).checked);
+      }),
+    );
+    this.$('sel-alt').addEventListener('change', (e) =>
+      m.act(() => {
+        const it = cur();
+        if (it?.type === 'ball') setOpt(it, 'alt', (e.target as HTMLSelectElement).value);
+      }),
+    );
+
+    /* the caption, legend and courts: details of the diagram, like the title (not undo steps) */
+    this.$('show-caption').addEventListener('change', (e) => this.setMeta({ showCaption: (e.target as HTMLInputElement).checked || undefined }));
+    const legendBox = this.$('legend-rows');
+    const legendAt = (t: EventTarget | null): { i: number; f: string; el: HTMLInputElement } | null => {
+      const el = t as HTMLInputElement;
+      const row = el.closest<HTMLElement>('[data-i]');
+      return row && el.dataset['f'] ? { i: +(row.dataset['i'] ?? 0), f: el.dataset['f'], el } : null;
+    };
+    const legendEdit = (e: Event): void => {
+      const at = legendAt(e.target);
+      const entry = at && m.meta.legend?.[at.i];
+      if (!at || !entry) return;
+      if (at.f === 'text') entry.text = at.el.value;
+      else setOpt(entry, at.f as 'key' | 'color', at.f === 'key' && !at.el.value.trim() ? '' : at.el.value);
+      this.render();
+      this.emitChange();
+    };
+    legendBox.addEventListener('input', legendEdit);
+    legendBox.addEventListener('change', (e) => (e.target as HTMLElement).tagName === 'SELECT' && legendEdit(e));
+    legendBox.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('[data-remove]');
+      const row = btn?.closest<HTMLElement>('[data-i]');
+      if (!row || !m.meta.legend) return;
+      m.meta.legend.splice(+(row.dataset['i'] ?? 0), 1);
+      if (!m.meta.legend.length) delete m.meta.legend;
+      this.render();
+      this.emitChange();
+      this.$('legend-add').focus();
+    });
+    this.$('legend-add').addEventListener('click', () => {
+      const legend = (m.meta.legend ??= []);
+      if (legend.length >= LIMITS.legendEntries) return;
+      legend.push({ key: nextKey({ items: m.items, legend }), text: '' });
+      this.render();
+      this.emitChange();
+      this.$(`lg-text-${legend.length - 1}`).focus();
+    });
+    this.$('courts-n').addEventListener('change', (e) => {
+      const n = +(e.target as HTMLSelectElement).value;
+      const old = m.meta.courts ?? [];
+      if (n <= 1) delete m.meta.courts;
+      else m.meta.courts = Array.from({ length: n }, (_, i) => old[i] ?? { label: `Court ${i + 1}` });
+      m.court = Math.min(m.court, n);
+      this.sel = null;
+      this.render();
+      this.emitChange();
+    });
+    this.$('court-rows').addEventListener('input', (e) => {
+      const el = e.target as HTMLInputElement;
+      const i = +(el.closest<HTMLElement>('[data-i]')?.dataset['i'] ?? -1);
+      const ct = m.meta.courts?.[i];
+      if (!ct || (el.dataset['f'] !== 'label' && el.dataset['f'] !== 'link')) return;
+      setOpt(ct, el.dataset['f'], el.value);
+      this.render(false);
+      this.emitChange();
+    });
+    this.$('court-pick').addEventListener('change', (e) => {
+      m.court = +(e.target as HTMLSelectElement).value || 1;
+      this.sel = null;
+      this.render();
+    });
 
     /* sheets */
     const back = (id: string) => this.$(id).addEventListener('click', () => this.closeSheet());
