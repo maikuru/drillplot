@@ -1,0 +1,18 @@
+{
+ "format": "drill-diagram", "version": 1,
+ "title": "Split step on a line",
+ "caption": "Be still before each contact.",
+ "view": "full", "orient": "landscape", "showCaption": true,
+ "legend": [
+  { "key": "1", "text": "Hit from the back, then move up." },
+  { "key": "2", "text": "Stop and split on the dashed line." },
+  { "key": "3", "text": "Play the next ball from a balanced stop." }
+ ],
+ "items": [
+  { "type": "line", "x1": 0, "y1": 9.5, "x2": 20, "y2": 9.5, "color": "orange", "dash": true, "key": "2" },
+  { "type": "player", "x": 10, "y": 2.4, "label": "A", "team": "orange", "note": "hitter" },
+  { "type": "player", "x": 15, "y": 30.8, "label": "F", "team": "black", "note": "feeder" },
+  { "type": "move", "x1": 9.2, "y1": 3.9, "x2": 9.2, "y2": 7.5, "key": "1" },
+  { "type": "ball", "x1": 13.5, "y1": 29.6, "x2": 11.2, "y2": 11.2, "n": 3, "color": "white", "dash": true }
+ ]
+}

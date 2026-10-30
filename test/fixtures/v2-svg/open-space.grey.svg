@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.5 -22.5 49 33.8" width="784" height="541" role="img" aria-label="Cross and cover" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">
+<title>Cross and cover</title>
+<desc>Call before you move.</desc>
+<metadata>{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Cross and cover",
+ "caption": "Call before you move.",
+ "view": "full",
+ "side": "bottom",
+ "orient": "landscape",
+ "showCaption": true,
+ "legend": [
+  {
+   "key": "1",
+   "text": "Call it, then cross for the middle ball."
+  },
+  {
+   "key": "2",
+   "text": "Partner slides across behind."
+  },
+  {
+   "color": "orange",
+   "text": "Dashed box: the space left open."
+  }
+ ],
+ "items": [
+  {
+   "type": "zone",
+   "x": 1,
+   "y": 2,
+   "w": 7,
+   "h": 7.5,
+   "label": "",
+   "ghost": true
+  },
+  {
+   "type": "player",
+   "x": 4,
+   "y": 11.2,
+   "label": "A",
+   "team": "orange",
+   "note": "crosser"
+  },
+  {
+   "type": "player",
+   "x": 15.8,
+   "y": 11.2,
+   "label": "B",
+   "team": "orange",
+   "note": "partner"
+  },
+  {
+   "type": "player",
+   "x": 4,
+   "y": 34.2,
+   "label": "C",
+   "team": "blue"
+  },
+  {
+   "type": "player",
+   "x": 15.8,
+   "y": 34.2,
+   "label": "D",
+   "team": "blue"
+  },
+  {
+   "type": "move",
+   "x1": 5.2,
+   "y1": 12.6,
+   "x2": 9.2,
+   "y2": 19.1,
+   "color": "orange",
+   "key": "1"
+  },
+  {
+   "type": "move",
+   "x1": 14.2,
+   "y1": 11.2,
+   "x2": 6.8,
+   "y2": 11.2,
+   "key": "2"
+  }
+ ]
+}</metadata>
+<rect x="-2.5" y="-22.5" width="49" height="33.8" fill="#ffffff"/>
+<g transform="rotate(-90)"><rect x="-2.5" y="-2.5" width="25" height="49" fill="#6a6a6a"/><rect x="0" y="0" width="20" height="44" fill="#626262"/><rect x="0" y="15" width="20" height="7" fill="#4f4f4f"/><rect x="0" y="22" width="20" height="7" fill="#4f4f4f"/><rect x="0" y="0" width="20" height="44" stroke="#ffffff" stroke-width="0.2" fill="none"/><path d="M0 15H20M0 29H20M10 0V15M10 29V44" stroke="#ffffff" stroke-width="0.2" fill="none"/><text x="10" y="18.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 10 18.5)">Kitchen</text><text x="10" y="25.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 10 25.5)">Kitchen</text><rect x="-1" y="21.82" width="22" height="0.36" fill="#f4f4f4" stroke="#1a1a1a" stroke-width="0.07"/>
+<rect x="1" y="2" width="7" height="7.5" fill="none" stroke="#a2a2a2" stroke-width="0.2" stroke-dasharray="0.8 0.6"/>
+<circle cx="4" cy="11.2" r="1.3" fill="#a3a3a3" stroke="#ffffff" stroke-width="0.14"/><text x="4" y="11.2" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 4 11.2)">A</text><text x="1.95" y="11.2" dy="0.35em" font-size="0.9" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 1.95 11.2)">crosser</text>
+<circle cx="15.8" cy="11.2" r="1.3" fill="#a3a3a3" stroke="#ffffff" stroke-width="0.14"/><text x="15.8" y="11.2" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 15.8 11.2)">B</text><text x="13.75" y="11.2" dy="0.35em" font-size="0.9" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 13.75 11.2)">partner</text>
+<circle cx="4" cy="34.2" r="1.3" fill="#5e5e5e" stroke="#ffffff" stroke-width="0.14"/><text x="4" y="34.2" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 4 34.2)">C</text>
+<circle cx="15.8" cy="34.2" r="1.3" fill="#5e5e5e" stroke="#ffffff" stroke-width="0.14"/><text x="15.8" y="34.2" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 15.8 34.2)">D</text>
+<path d="M5.2 12.6L8.52 17.99" fill="none" stroke="#a3a3a3" stroke-width="0.24" stroke-dasharray="0.7 0.55"/><polygon points="9.2,19.1 8.05,18.28 8.99,17.7" fill="#a3a3a3"/><circle cx="7.2" cy="15.85" r="0.75" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.12"/><text x="7.2" y="15.85" dy="0.35em" font-size="0.94" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 7.2 15.85)">1</text>
+<path d="M14.2 11.2L8.1 11.2" fill="none" stroke="#ffffff" stroke-width="0.24" stroke-dasharray="0.7 0.55"/><polygon points="6.8,11.2 8.1,10.65 8.1,11.75" fill="#ffffff"/><circle cx="10.5" cy="11.2" r="0.75" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.12"/><text x="10.5" y="11.2" dy="0.35em" font-size="0.94" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 10.5 11.2)">2</text>
+</g>
+<circle cx="-0.85" cy="4.05" r="0.75" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.12"/><text x="-0.85" y="4.05" dy="0.35em" font-size="0.94" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">1</text><text x="0.5" y="4.05" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em">Call it, then cross for the middle ball.</text><circle cx="-0.85" cy="5.95" r="0.75" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.12"/><text x="-0.85" y="5.95" dy="0.35em" font-size="0.94" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">2</text><text x="0.5" y="5.95" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em">Partner slides across behind.</text><rect x="-1.7" y="7.55" width="1.7" height="0.6" fill="#a3a3a3" stroke="#1a1a1a" stroke-width="0.06"/><text x="0.5" y="7.85" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em">Dashed box: the space left open.</text><text x="-1.7" y="10.05" font-size="1" fill="#1a1a1a" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" dy="0.35em" font-style="italic">Call before you move.</text>
+</svg>

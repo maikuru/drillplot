@@ -1,0 +1,26 @@
+{
+ "format": "drill-diagram", "version": 1,
+ "title": "Reset to a target",
+ "caption": "Counter only off a ball you can attack.",
+ "view": "full", "orient": "portrait", "showCaption": true,
+ "legend": [
+  { "key": "1", "text": "The attack comes to the middle." },
+  { "key": "2a", "text": "Reset to R1," },
+  { "key": "2b", "text": "or reset to R2." },
+  { "key": "3", "text": "Partner shifts toward the middle." }
+ ],
+ "items": [
+  { "type": "zone", "x": 3, "y": 23, "w": 6, "h": 5.5, "label": "R1", "ghost": true },
+  { "type": "zone", "x": 11, "y": 23, "w": 6, "h": 5.5, "label": "R2", "ghost": true },
+  { "type": "cone", "x": 5, "y": 43, "label": "T1" },
+  { "type": "cone", "x": 15, "y": 43, "label": "T2" },
+  { "type": "player", "x": 6, "y": 14, "label": "A", "team": "orange" },
+  { "type": "player", "x": 14, "y": 14, "label": "B", "team": "orange" },
+  { "type": "player", "x": 6, "y": 30, "label": "C", "team": "blue" },
+  { "type": "player", "x": 14, "y": 30, "label": "D", "team": "blue" },
+  { "type": "ball", "x1": 6, "y1": 28.6, "x2": 6, "y2": 15.5, "n": 1, "color": "orange" },
+  { "type": "ball", "x1": 6, "y1": 15.3, "x2": 6, "y2": 25.8, "curve": true, "bend": 1, "n": 2, "alt": "a" },
+  { "type": "ball", "x1": 6.5, "y1": 15.3, "x2": 14, "y2": 25.8, "curve": true, "bend": -1, "n": 2, "alt": "b" },
+  { "type": "move", "x1": 13.5, "y1": 12.5, "x2": 10.5, "y2": 12.5, "color": "green", "key": "3" }
+ ]
+}

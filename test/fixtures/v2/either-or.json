@@ -1,0 +1,19 @@
+{
+ "format": "drill-diagram", "version": 1,
+ "title": "Pick a shot by the score",
+ "caption": "Same start; the score picks the shot.",
+ "view": "full", "orient": "landscape", "showCaption": true,
+ "legend": [
+  { "key": "1a", "text": "Ahead: stay patient and wait for a clear chance." },
+  { "key": "1b", "text": "Behind: take the first clear chance." },
+  { "text": "Choose one before the serve." }
+ ],
+ "items": [
+  { "type": "player", "x": 4, "y": 15.9, "label": "A", "team": "orange" },
+  { "type": "player", "x": 15.8, "y": 15.9, "label": "B", "team": "orange" },
+  { "type": "player", "x": 4, "y": 28.1, "label": "C", "team": "blue" },
+  { "type": "player", "x": 15.8, "y": 28.1, "label": "D", "team": "blue" },
+  { "type": "ball", "x1": 15.5, "y1": 17.1, "x2": 6, "y2": 26.9, "curve": true, "bend": 1, "n": 1, "color": "green", "dash": true, "alt": "a" },
+  { "type": "ball", "x1": 3, "y1": 17.1, "x2": 14, "y2": 26.9, "curve": true, "bend": -1, "n": 1, "color": "orange", "alt": "b" }
+ ]
+}

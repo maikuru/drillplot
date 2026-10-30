@@ -72,7 +72,7 @@ function canonical(source: DrillSource): unknown {
   const { format, version, title, caption, view, side, orient } = source;
   const extra = present(
     {
-      showCaption: source.showCaption,
+      showCaption: source.showCaption || undefined,
       courts: source.courts?.map((ct) => present(ct as Record<string, unknown>, ['label', 'link'])),
       legend: source.legend?.map((e) => present(e as unknown as Record<string, unknown>, ['key', 'color', 'text'])),
     },
