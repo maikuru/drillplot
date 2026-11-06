@@ -1,0 +1,28 @@
+{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Shift together: two moments, one tether",
+ "caption": "A and B, both right-handed, at the kitchen line. The ball goes wide left (1), crosses court (2) and comes back wide right (3). The pair shifts right together, and the gap between them stays the same.",
+ "view": "full",
+ "side": "bottom",
+ "orient": "portrait",
+ "legend": [
+  { "key": "1", "text": "The ball comes wide left. The pair has shifted left (faded rings: the first moment)." },
+  { "key": "2", "text": "A plays it cross-court; both shift right as it travels." },
+  { "key": "3", "text": "It comes back wide right. The pair has shifted right; the gap is the same." },
+  { "tether": "orange", "text": "The tether: the gap between partners, kept as they move." }
+ ],
+ "items": [
+  { "type": "player", "x": 5, "y": 14.25, "label": "C", "team": "blue", "hand": "right" },
+  { "type": "player", "x": 15, "y": 14.25, "label": "D", "team": "blue", "hand": "right" },
+  { "type": "player", "x": 1.5, "y": 29.75, "label": "A", "team": "orange", "hand": "right", "tether": "AB", "moment": 1 },
+  { "type": "player", "x": 8.5, "y": 29.75, "label": "B", "team": "orange", "hand": "right", "tether": "AB", "moment": 1 },
+  { "type": "player", "x": 11.5, "y": 29.75, "label": "A", "team": "orange", "hand": "right", "tether": "AB", "moment": 2 },
+  { "type": "player", "x": 18.5, "y": 29.75, "label": "B", "team": "orange", "hand": "right", "tether": "AB", "moment": 2 },
+  { "type": "move", "x1": 1.5, "y1": 32.2, "x2": 10.7, "y2": 32.2 },
+  { "type": "move", "x1": 8.5, "y1": 33.4, "x2": 17.7, "y2": 33.4 },
+  { "type": "ball", "x1": 5, "y1": 15.5, "x2": 1.8, "y2": 28.3, "curve": true, "bend": 1, "n": 1, "moment": 1 },
+  { "type": "ball", "x1": 2.2, "y1": 28.6, "x2": 15.3, "y2": 17.4, "curve": true, "bend": -1, "n": 2, "moment": 2 },
+  { "type": "ball", "x1": 15.4, "y1": 15.5, "x2": 18.3, "y2": 28.3, "curve": true, "bend": 1, "n": 3, "moment": 2 }
+ ]
+}

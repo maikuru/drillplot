@@ -1,0 +1,18 @@
+{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Named regions, landscape",
+ "caption": "Regions with their labels in each position, on a court turned a quarter turn.",
+ "view": "full",
+ "side": "bottom",
+ "orient": "landscape",
+ "items": [
+  { "type": "region", "x": 0, "y": 0, "w": 10, "h": 15, "label": "left service", "labelAt": "top-left", "mirror": true },
+  { "type": "region", "x": 10, "y": 0, "w": 10, "h": 15, "label": "right service", "labelAt": "bottom-right", "mirror": true },
+  { "type": "region", "x": 0, "y": 15, "w": 20, "h": 14, "label": "kitchen (7 ft)", "labelAt": "top", "key": "K" },
+  { "type": "player", "x": 6, "y": 36, "label": "A", "team": "white", "hand": "left", "tether": "1" },
+  { "type": "player", "x": 14, "y": 36, "label": "B", "team": "white", "hand": "right", "tether": "1" },
+  { "type": "player", "x": 6, "y": 8, "label": "C", "team": "black", "ghost": true, "moment": 1, "tether": "2" },
+  { "type": "player", "x": 14, "y": 8, "label": "D", "team": "black", "ghost": true, "moment": 1, "tether": "2" }
+ ]
+}

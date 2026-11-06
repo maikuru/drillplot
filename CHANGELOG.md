@@ -4,6 +4,23 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+Every format addition below is optional and still format version 1. A document written for 0.1 or 0.2 validates, saves and renders byte for byte as before (`test/compat.test.ts` and the 0.2 fixture snapshots are unchanged); the one exception is the clipping fix, which changes kitchen and half views that have a legend or a printed caption.
+
+### Added
+
+- **Moments.** `moment` (1 to 9) on any item. On each court, items of an earlier moment than the latest are drawn faded, and players of an earlier moment as rings in their team color, so one figure can show "before" and "after".
+- **Ghosts in their team color.** A `ghost` player with a `moment` keeps its team color. A `ghost` with no moment is unchanged.
+- **Tethers.** `tether`, a pair name, on a player: two players on one court, in one moment, with the same name are joined by a line in their team color that follows them and fades with its moment. A legend note's `tether` (a player color) draws a tether swatch.
+- **Named regions.** A new `region` item: a neutral shaded box with a label placed by `labelAt` (center, a side or a corner, as drawn on the page) and `mirror` for a band on both halves in one item. Closes G13 in [docs/coverage-0.2.md](docs/coverage-0.2.md).
+- **Handedness.** `hand` (`right` or `left`) on a player draws a small paddle on the forehand side, facing the net.
+- New error keys `bad_moment`, `bad_hand`, `bad_tether` and `bad_label_position`; new limits in `LIMITS`; `LABEL_POSITIONS`; the `Region`, `Hand` and `LabelPosition` types. The JSON Schema describes every addition.
+- The editor draws tethers, moments, regions and paddles, and selects, moves, resizes and relabels regions. It keeps `moment`, `hand`, `tether`, `labelAt` and `mirror` through a load and save, but has no inspector fields for them yet.
+- Fixture diagrams for the additions in `test/fixtures/additions`, including two reading diagrams (a pair shifting together, and a rally map) redrawn with them, and two gallery examples in the demo.
+
+### Fixed
+
+- A single court in `kitchen` or `half` view with a `legend` or `showCaption` was not clipped to its frame, so the court and its pieces ran on under the legend. It is now drawn in a nested `<svg>` viewport, as each of several courts already was. A full view is unchanged.
+
 ## [0.2.0] - 2026-10-29
 
 Every format addition below is optional and still format version 1. A document written for 0.1 validates, saves and renders byte for byte as before; `test/compat.test.ts` checks that against SVGs written by 0.1.1. [docs/coverage-0.2.md](docs/coverage-0.2.md) lists what real drill handouts draw and how each feature is covered.

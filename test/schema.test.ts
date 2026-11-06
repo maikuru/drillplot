@@ -47,6 +47,27 @@ const samples: Array<[string, unknown, boolean]> = [
   ['bare line', one({ type: 'line', x1: 0, y1: 33, x2: 20, y2: 33 }), true],
   ['mark', one({ type: 'mark', x: 5, y: 5, key: '4' }), true],
 
+  // unreleased
+  ['tethered pair in moments', { ...base, items: [{ type: 'player', x: 1, y: 1, tether: 'AB', hand: 'right', moment: 1 }, { type: 'player', x: 5, y: 1, tether: 'AB', hand: 'left', moment: 1 }] }, true],
+  ['moment on every kind of item', { ...base, items: [{ type: 'cone', x: 1, y: 1, moment: 9 }, { ...ball, moment: 2 }, { type: 'mark', x: 1, y: 1, key: '1', moment: 1 }] }, true],
+  ['region', one({ type: 'region', x: -2, y: -2, w: 24, h: 48, label: long(24), labelAt: 'bottom-right', mirror: true, key: 'R' }), true],
+  ['bare region', one({ type: 'region', x: 0, y: 0, w: 0.5, h: 0.5 }), true],
+  ['legend tether swatch', { ...base, legend: [{ tether: 'white', text: 'The tether' }] }, true],
+  ['legend tether swatch with an older team key', { ...base, legend: [{ tether: 't2', text: 'x' }] }, true],
+  ['moment 0', one({ type: 'cone', x: 1, y: 1, moment: 0 }), false],
+  ['moment 10', one({ type: 'cone', x: 1, y: 1, moment: 10 }), false],
+  ['moment 1.5', one({ type: 'cone', x: 1, y: 1, moment: 1.5 }), false],
+  ['hand both', one({ type: 'player', x: 1, y: 1, hand: 'both' }), false],
+  ['tether too long', one({ type: 'player', x: 1, y: 1, tether: long(9) }), false],
+  ['tether blank', one({ type: 'player', x: 1, y: 1, tether: ' ' }), false],
+  ['tether with a newline', one({ type: 'player', x: 1, y: 1, tether: 'a\nb' }), false],
+  ['region too wide', one({ type: 'region', x: 0, y: 0, w: 24.5, h: 2 }), false],
+  ['region too short', one({ type: 'region', x: 0, y: 0, w: 2, h: 0.4 }), false],
+  ['region label position unknown', one({ type: 'region', x: 0, y: 0, w: 2, h: 2, labelAt: 'middle' }), false],
+  ['region mirror as text', one({ type: 'region', x: 0, y: 0, w: 2, h: 2, mirror: 'yes' }), false],
+  ['region label too long', one({ type: 'region', x: 0, y: 0, w: 2, h: 2, label: long(25) }), false],
+  ['legend tether swatch of an unknown color', { ...base, legend: [{ tether: 'green', text: 'x' }] }, false],
+
   ['showCaption as text', { ...base, showCaption: 'yes' }, false],
   ['legend not a list', { ...base, legend: { key: '1' } }, false],
   ['21 legend notes', { ...base, legend: Array.from({ length: 21 }, () => ({ key: '1', text: 'x' })) }, false],
@@ -121,6 +142,13 @@ describe('JSON Schema and validator agree', () => {
   it('compiles as shipped, with a real $id', () => {
     expect((schema as { $id: string }).$id).toBe('https://maikuru.github.io/drillplot/schema/drill-diagram.v1.schema.json');
     expect(() => new Ajv2020({ strict: true }).compile(schema)).not.toThrow();
+  });
+
+  it('the reader alone checks that a tether joins at most two players', () => {
+    const p = { type: 'player', x: 1, y: 1, tether: 'AB' };
+    const doc = { ...base, items: [p, p, p] };
+    expect(validate(doc)).toBe(true);
+    expect(parseSource(doc)).toMatchObject({ ok: false, errors: [{ key: 'bad_tether', path: '/items/2/tether' }] });
   });
 
   it('the reader alone checks a court number against the number of courts', () => {

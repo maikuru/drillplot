@@ -98,16 +98,20 @@ export function parseText(input: string): ParseResult {
   return parseSource(t);
 }
 
-/** Each item's keys in order: the 0.1 fields, then the optional 0.2 fields, which are written only when set. */
+/**
+ * Each item's keys in order: the 0.1 fields, then the optional 0.2 fields, then the unreleased
+ * ones, each written only when set.
+ */
 const KEY_ORDER: Record<string, readonly string[]> = {
-  player: ['type', 'x', 'y', 'label', 'team', 'note', 'ghost', 'key', 'court'],
-  machine: ['type', 'x', 'y', 'angle', 'key', 'court'],
-  cone: ['type', 'x', 'y', 'label', 'key', 'court'],
-  zone: ['type', 'x', 'y', 'w', 'h', 'label', 'ghost', 'key', 'court'],
-  move: ['type', 'x1', 'y1', 'x2', 'y2', 'color', 'key', 'court'],
-  ball: ['type', 'x1', 'y1', 'x2', 'y2', 'curve', 'bend', 'n', 'color', 'dash', 'alt', 'court'],
-  line: ['type', 'x1', 'y1', 'x2', 'y2', 'color', 'dash', 'label', 'key', 'court'],
-  mark: ['type', 'x', 'y', 'key', 'court'],
+  player: ['type', 'x', 'y', 'label', 'team', 'note', 'ghost', 'key', 'hand', 'tether', 'court', 'moment'],
+  machine: ['type', 'x', 'y', 'angle', 'key', 'court', 'moment'],
+  cone: ['type', 'x', 'y', 'label', 'key', 'court', 'moment'],
+  zone: ['type', 'x', 'y', 'w', 'h', 'label', 'ghost', 'key', 'court', 'moment'],
+  move: ['type', 'x1', 'y1', 'x2', 'y2', 'color', 'key', 'court', 'moment'],
+  ball: ['type', 'x1', 'y1', 'x2', 'y2', 'curve', 'bend', 'n', 'color', 'dash', 'alt', 'court', 'moment'],
+  line: ['type', 'x1', 'y1', 'x2', 'y2', 'color', 'dash', 'label', 'key', 'court', 'moment'],
+  mark: ['type', 'x', 'y', 'key', 'court', 'moment'],
+  region: ['type', 'x', 'y', 'w', 'h', 'label', 'labelAt', 'mirror', 'key', 'court', 'moment'],
 };
 
 const present = (rec: Record<string, unknown>, keys: readonly string[]): Record<string, unknown> =>
@@ -124,7 +128,7 @@ function canonical(source: DrillSource): unknown {
     {
       showCaption: source.showCaption || undefined,
       courts: source.courts?.map((ct) => present(ct as Record<string, unknown>, ['label', 'link'])),
-      legend: source.legend?.map((e) => present(e as unknown as Record<string, unknown>, ['key', 'color', 'text'])),
+      legend: source.legend?.map((e) => present(e as unknown as Record<string, unknown>, ['key', 'color', 'tether', 'text'])),
     },
     ['showCaption', 'courts', 'legend'],
   );
