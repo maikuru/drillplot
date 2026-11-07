@@ -157,7 +157,7 @@ describe('<drillplot-editor> with the 0.2 fields', () => {
   });
 });
 
-describe('<drillplot-editor> with the unreleased additions', () => {
+describe('<drillplot-editor> with the 0.3 additions', () => {
   const extra = resolve(process.cwd(), 'test/fixtures/additions');
   const docs = readdirSync(extra)
     .filter((f) => f.endsWith('.json'))

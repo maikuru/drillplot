@@ -5,9 +5,9 @@ export type HalfSide = 'bottom' | 'top';
 export type Orientation = 'portrait' | 'landscape';
 /** Colors a ball path, movement arrow or line may take instead of its default. */
 export type PathColor = 'yellow' | 'white' | 'orange' | 'red' | 'pink' | 'green' | 'black';
-/** Unreleased. A player's dominant hand. */
+/** Since 0.3. A player's dominant hand. */
 export type Hand = 'right' | 'left';
-/** Unreleased. Where a region's label sits, as the region is drawn on the page. */
+/** Since 0.3. Where a region's label sits, as the region is drawn on the page. */
 export type LabelPosition = 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
 /*
@@ -15,16 +15,16 @@ export type LabelPosition = 'center' | 'top' | 'bottom' | 'left' | 'right' | 'to
  * reader does not fill them in, so a document written for 0.1 normalizes, saves and draws
  * exactly as it did.
  *
- * Fields and items marked "Unreleased" follow the same rule, so a document written for 0.2 also
+ * Fields and items marked "Since 0.3" follow the same rule, so a document written for 0.2 also
  * normalizes and draws exactly as it did. Every item may also carry `moment`.
  */
 
-/** Unreleased. Fields every item may carry. */
+/** Since 0.3. Fields every item may carry. */
 interface Common {
   /** Which court, 1 or more, when the diagram has `courts`. */
   court?: number;
   /**
-   * Unreleased. The moment the item belongs to, 1 to 9. On each court, items of an earlier moment
+   * Since 0.3. The moment the item belongs to, 1 to 9. On each court, items of an earlier moment
    * than the latest one there are drawn faded, and players of an earlier moment as rings in their
    * team color. Items with no moment are drawn as usual.
    */
@@ -43,10 +43,10 @@ export interface Player extends Common {
   ghost?: boolean;
   /** Since 0.2. A legend badge (see `legend`). */
   key?: string;
-  /** Unreleased. The dominant hand: a small paddle is drawn on the forehand side, facing the net. */
+  /** Since 0.3. The dominant hand: a small paddle is drawn on the forehand side, facing the net. */
   hand?: Hand;
   /**
-   * Unreleased. A name for a pair, up to 8 characters. Two players on the same court, in the same
+   * Since 0.3. A name for a pair, up to 8 characters. Two players on the same court, in the same
    * moment, with the same tether are joined by a tether drawn between them.
    */
   tether?: string;
@@ -123,7 +123,7 @@ export interface Line extends Common {
 }
 
 /**
- * Unreleased. A named region of the court: a neutral shaded box with a label placed where you
+ * Since 0.3. A named region of the court: a neutral shaded box with a label placed where you
  * choose, distinct from the orange target `zone`. With `mirror`, one item is a band on both halves.
  */
 export interface Region extends Common {
@@ -154,7 +154,7 @@ export interface LegendEntry {
   key?: string;
   /** A swatch of a path color, for a note with no key. */
   color?: PathColor;
-  /** Unreleased. A swatch of a tether in a player color, for a note with no key or color. */
+  /** Since 0.3. A swatch of a tether in a player color, for a note with no key or color. */
   tether?: PlayerColor;
   text: string;
 }

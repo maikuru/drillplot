@@ -258,9 +258,9 @@ A source with a `legend`, `showCaption` or `courts` is drawn on a white page: th
 }
 ```
 
-## Additions after 0.2 (unreleased)
+## Additions in 0.3
 
-These are in the Unreleased section of the [changelog](../CHANGELOG.md): optional, still format version 1, and under the same rules as [the 0.2 additions](#additions-in-02). A reader does not fill them in, so a document written for 0.1 or 0.2 normalizes, saves and draws exactly as it did. They let one figure show a pair moving together, a rally in two moments, the named regions of the court and which side is each player's forehand. A 0.2 package drops `moment`, `hand`, `tether`, `labelAt`, `mirror` and a legend `tether` on save, and refuses a `region` with `unknown_item_type`.
+These are in the 0.3.0 section of the [changelog](../CHANGELOG.md): optional, still format version 1, and under the same rules as [the 0.2 additions](#additions-in-02). A reader does not fill them in, so a document written for 0.1 or 0.2 normalizes, saves and draws exactly as it did. They let one figure show a pair moving together, a rally in two moments, the named regions of the court and which side is each player's forehand. A 0.2 package drops `moment`, `hand`, `tether`, `labelAt`, `mirror` and a legend `tether` on save, and refuses a `region` with `unknown_item_type`.
 
 `stringifySource` writes them last on each item, in this order: `hand` and `tether` on a player after `key`, `labelAt`, `mirror` and `key` on a region after `label`, then `court`, then `moment` on every item. A legend note writes `tether` after `color`.
 
@@ -351,11 +351,11 @@ A kitchen or half view with a `legend` or `showCaption` is now clipped to its fr
 | Legend notes (0.2) | 20, each up to 100 characters | `bad_legend`, `label_too_long` |
 | Courts (0.2) | 1 to 4; label 24, link 40 characters | `bad_courts`, `label_too_long` |
 | Item `court` (0.2) | 1 to the number of courts | `bad_court` |
-| Item `moment` (unreleased) | 1 to 9, whole | `bad_moment` |
-| Player `tether` (unreleased) | 1 to 8 characters, not only spaces; at most two players per name, court and moment | `bad_tether` |
-| Region label (unreleased) | 24 characters | `label_too_long` |
-| Region width `w` (unreleased) | 0.5 to 24 feet | `bad_size` |
-| Region height `h` (unreleased) | 0.5 to 48 feet | `bad_size` |
+| Item `moment` (since 0.3) | 1 to 9, whole | `bad_moment` |
+| Player `tether` (since 0.3) | 1 to 8 characters, not only spaces; at most two players per name, court and moment | `bad_tether` |
+| Region label (since 0.3) | 24 characters | `label_too_long` |
+| Region width `w` (since 0.3) | 0.5 to 24 feet | `bad_size` |
+| Region height `h` (since 0.3) | 0.5 to 48 feet | `bad_size` |
 
 These are exported from the package as `LIMITS`, `COURT` and `BOUNDS`. Range checks use the number as written, before rounding: `-2.004` is out of bounds even though it would round to `-2`. A number must be a finite JSON number; `"7"` (a string), `null` and `NaN` are `not_a_number`.
 
@@ -376,7 +376,7 @@ The JSON Schema describes the shape and the limits, but it does not round or fil
 The renderer ([`renderSvg`](api.md#rendersvgsource-options)) draws, back to front:
 
 1. The court: grass, the court surface, the two kitchens in a darker blue, the lines, the labels "Kitchen", and the net.
-2. Items by layer: regions, zones, lines, cones, machines, tethers, players, movement arrows, ball paths, marks. Within a layer the order in `items` is kept. (Lines and marks are since 0.2; regions and tethers are unreleased.) An item of an earlier [moment](#moments) is drawn faded in its layer.
+2. Items by layer: regions, zones, lines, cones, machines, tethers, players, movement arrows, ball paths, marks. Within a layer the order in `items` is kept. (Lines and marks are since 0.2; regions and tethers are since 0.3.) An item of an earlier [moment](#moments) is drawn faded in its layer.
 3. Since 0.2, the legend and the visible caption under the court; see [Drawing the additions](#drawing-the-additions).
 
 So a ball path is always above a player, whatever their order in the list. The SVG's own `width` and `height` are 16 pixels per foot of the frame. In greyscale mode every color becomes its luma grey; this is for display and the editor never exports it.
@@ -524,10 +524,10 @@ bad_shot_number  /items/1/n
 | `bad_court` | Since 0.2. An item's `court` is not a whole number from 1 to the number of courts. | `/items/N/court` |
 | `bad_courts` | Since 0.2. `courts` is not a list of 1 to 4 objects. | `/courts` |
 | `bad_legend` | Since 0.2. `legend` is not a list of at most 20 objects. A note without `text` is `not_text`. | `/legend` |
-| `bad_moment` | Unreleased. An item's `moment` is not a whole number from 1 to 9. | `/items/N/moment` |
-| `bad_hand` | Unreleased. A player's `hand` is not `right` or `left`. | `/items/N/hand` |
-| `bad_tether` | Unreleased. A player's `tether` is not 1 to 8 characters of one-line text, or is only spaces; or a third player on that court, in that moment, has the same one. | `/items/N/tether` |
-| `bad_label_position` | Unreleased. A region's `labelAt` is not one of the nine positions. | `/items/N/labelAt` |
+| `bad_moment` | Since 0.3. An item's `moment` is not a whole number from 1 to 9. | `/items/N/moment` |
+| `bad_hand` | Since 0.3. A player's `hand` is not `right` or `left`. | `/items/N/hand` |
+| `bad_tether` | Since 0.3. A player's `tether` is not 1 to 8 characters of one-line text, or is only spaces; or a third player on that court, in that moment, has the same one. | `/items/N/tether` |
+| `bad_label_position` | Since 0.3. A region's `labelAt` is not one of the nine positions. | `/items/N/labelAt` |
 | `empty_input` | `parseText` was given empty or whitespace-only text. | `""` |
 | `no_svg_source` | `parseText` was given an SVG with no embedded source (not made by drillplot). | `""` |
 | `bad_svg_source` | `parseText` found a source in the SVG but it is not valid JSON. | `""` |

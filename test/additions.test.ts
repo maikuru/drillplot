@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { drawOrder, parseSource, parseText, renderSvg, sampleDrill, stringifySource, type DrillSource, type Item, type Player } from '../src/index.js';
 import { itemMarkup, itemsMarkup } from '../src/render/markup.js';
 
-/* The unreleased additions: tethers, moments, named regions, handedness, and the single-court clipping fix. */
+/* The 0.3 additions: tethers, moments, named regions, handedness, and the single-court clipping fix. */
 const dir = new URL('./fixtures/additions/', import.meta.url);
 const schema = JSON.parse(readFileSync(new URL('../schema/drill-diagram.v1.schema.json', import.meta.url), 'utf8')) as object;
 const validate = new Ajv2020({ allErrors: true, strict: true }).compile(schema);

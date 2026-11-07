@@ -47,7 +47,7 @@ const samples: Array<[string, unknown, boolean]> = [
   ['bare line', one({ type: 'line', x1: 0, y1: 33, x2: 20, y2: 33 }), true],
   ['mark', one({ type: 'mark', x: 5, y: 5, key: '4' }), true],
 
-  // unreleased
+  // since 0.3
   ['tethered pair in moments', { ...base, items: [{ type: 'player', x: 1, y: 1, tether: 'AB', hand: 'right', moment: 1 }, { type: 'player', x: 5, y: 1, tether: 'AB', hand: 'left', moment: 1 }] }, true],
   ['moment on every kind of item', { ...base, items: [{ type: 'cone', x: 1, y: 1, moment: 9 }, { ...ball, moment: 2 }, { type: 'mark', x: 1, y: 1, key: '1', moment: 1 }] }, true],
   ['region', one({ type: 'region', x: -2, y: -2, w: 24, h: 48, label: long(24), labelAt: 'bottom-right', mirror: true, key: 'R' }), true],
