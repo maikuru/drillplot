@@ -4,6 +4,8 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-06
+
 Every format addition below is optional and still format version 1. A document written for 0.1 or 0.2 validates, saves and renders byte for byte as before (`test/compat.test.ts` and the 0.2 fixture snapshots are unchanged); the one exception is the clipping fix, which changes kitchen and half views that have a legend or a printed caption.
 
 ### Added
@@ -109,7 +111,8 @@ Every format addition below is optional and still format version 1. A document w
 - Every action can be done without a pointer: exact coordinate fields for the selected piece, and Enter adds an arrow when an arrow tool is chosen.
 - Unknown team keys and out-of-range values are refused with a message instead of being silently replaced.
 
-[Unreleased]: https://github.com/maikuru/drillplot/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/maikuru/drillplot/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/maikuru/drillplot/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/maikuru/drillplot/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/maikuru/drillplot/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/maikuru/drillplot/releases/tag/v0.1.0

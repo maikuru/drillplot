@@ -28,7 +28,7 @@ const COLOR = {
   ghostDash: '0.45 0.35',
   keyFill: '#ffffff',
   paper: '#ffffff',
-  /** Unreleased. */
+  /** Since 0.3. */
   region: '#ffffff',
   regionOpacity: 0.12,
   regionEdgeOpacity: 0.7,
@@ -125,7 +125,7 @@ function haloText(text: string, x: number, y: number, size: number, anchor: 'sta
   return `<text x="${round2(x)}" y="${round2(y)}" dy="0.35em" font-size="${size}" font-weight="700" fill="${c(COLOR.white)}" stroke="${c(COLOR.ink)}" stroke-width="0.2" paint-order="stroke" text-anchor="${anchor}" font-family="${FONT}"${up(x, y)}>${esc(text)}</text>`;
 }
 
-/** Unreleased. A ring's letter: white with a dark halo, so it reads over a faint team color. */
+/** Since 0.3. A ring's letter: white with a dark halo, so it reads over a faint team color. */
 function haloLetter(text: string, x: number, y: number, size: number, ctx: MarkupContext): string {
   const { c, up } = mk(ctx);
   return `<text x="${round2(x)}" y="${round2(y)}" dy="0.35em" font-size="${size}" font-weight="700" fill="${c(COLOR.white)}" stroke="${c(COLOR.ink)}" stroke-width="0.22" paint-order="stroke" text-anchor="middle" font-family="${FONT}"${up(x, y)}>${esc(text)}</text>`;
@@ -151,11 +151,11 @@ export function courtMarkup(v: Rect, ctx: MarkupContext): string {
   );
 }
 
-/** Unreleased. Whether an item belongs to a moment earlier than the latest one on its court. */
+/** Since 0.3. Whether an item belongs to a moment earlier than the latest one on its court. */
 const isEarlier = (it: Item, latest: number | undefined): boolean => it.moment !== undefined && latest !== undefined && it.moment < latest;
 
 /**
- * Unreleased. The paddle on a player's forehand side. A player faces the net, so a right-hander
+ * Since 0.3. The paddle on a player's forehand side. A player faces the net, so a right-hander
  * on the bottom half has the forehand to page right (+x), and on the top half to page left.
  */
 function paddle(p: Player, ctx: MarkupContext): string {
@@ -168,7 +168,7 @@ function paddle(p: Player, ctx: MarkupContext): string {
   );
 }
 
-/** Unreleased. Where a region's label goes: a point inset from the chosen side, as the region is drawn on the page. */
+/** Since 0.3. Where a region's label goes: a point inset from the chosen side, as the region is drawn on the page. */
 function regionLabel(r: { x: number; y: number; w: number; h: number }, at: LabelPosition, orient: Orientation): { x: number; y: number; anchor: 'start' | 'middle' | 'end' } {
   // the region as drawn: landscape turns the court a quarter turn (court x, y is page y, -x)
   const page = orient === 'landscape' ? { x: r.y, y: -(r.x + r.w), w: r.h, h: r.w } : r;
@@ -200,7 +200,7 @@ function regionMarkup(it: Region, ctx: MarkupContext): string {
   return s;
 }
 
-/** Unreleased. A tether between two players: a cased rope in the first one's team color. */
+/** Since 0.3. A tether between two players: a cased rope in the first one's team color. */
 export function tetherRope(x1: number, y1: number, x2: number, y2: number, team: PlayerColor, ctx: MarkupContext): string {
   const { c } = mk(ctx);
   const f = PLAYER_PALETTE[team] ?? PLAYER_PALETTE.orange;
@@ -208,7 +208,7 @@ export function tetherRope(x1: number, y1: number, x2: number, y2: number, team:
   return `<path d="${d}" fill="none" stroke="${c(f[2])}" stroke-width="0.62" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c(f[0])}" stroke-width="0.34" stroke-linecap="round"/>`;
 }
 
-/** Unreleased. The tethers among the items of one court: each pair with the same tether name and moment. */
+/** Since 0.3. The tethers among the items of one court: each pair with the same tether name and moment. */
 export function tetherMarkup(items: readonly Item[], ctx: MarkupContext, latest = latestMoment(items)): string {
   const pairs = new Map<string, Player[]>();
   for (const it of items) {
@@ -235,7 +235,7 @@ export function tetherMarkup(items: readonly Item[], ctx: MarkupContext, latest 
 }
 
 /**
- * Unreleased. The markup of one court's items, back to front, with the tethers just under the
+ * Since 0.3. The markup of one court's items, back to front, with the tethers just under the
  * players. `wrap` lets the editor put each piece in its own group. With no moment and no tether
  * this is exactly `drawOrder(items).map(itemMarkup)`.
  */

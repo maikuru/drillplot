@@ -30,7 +30,7 @@ export const LIMITS = {
   courts: { min: 1, max: 4 },
   courtLabelLength: 24,
   courtLinkLength: 40,
-  /** Unreleased. */
+  /** Since 0.3. */
   moments: { min: 1, max: 9 },
   tetherLength: 8,
   regionLabelLength: 24,
@@ -52,5 +52,5 @@ export const LEGACY_TEAMS: Readonly<Record<string, (typeof PLAYER_COLORS)[number
 /** Since 0.2. Path colors and what they draw as. */
 export const PATH_COLORS = ['yellow', 'white', 'orange', 'red', 'pink', 'green', 'black'] as const;
 
-/** Unreleased. Where a region's label may sit. */
+/** Since 0.3. Where a region's label may sit. */
 export const LABEL_POSITIONS = ['center', 'top', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;

@@ -99,7 +99,7 @@ export function parseText(input: string): ParseResult {
 }
 
 /**
- * Each item's keys in order: the 0.1 fields, then the optional 0.2 fields, then the unreleased
+ * Each item's keys in order: the 0.1 fields, then the optional 0.2 fields, then the 0.3
  * ones, each written only when set.
  */
 const KEY_ORDER: Record<string, readonly string[]> = {

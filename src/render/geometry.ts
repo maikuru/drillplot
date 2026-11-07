@@ -90,7 +90,7 @@ export function drawOrder<T extends Item>(items: readonly T[]): T[] {
     .map((p) => p[0]);
 }
 
-/** Unreleased. The latest moment among the items (those of one court), or undefined when none has one. */
+/** Since 0.3. The latest moment among the items (those of one court), or undefined when none has one. */
 export function latestMoment(items: readonly Item[]): number | undefined {
   let m: number | undefined;
   for (const it of items) if (it.moment !== undefined && (m === undefined || it.moment > m)) m = it.moment;
