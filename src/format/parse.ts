@@ -1,9 +1,11 @@
-import { BOUNDS, FORMAT_NAME, FORMAT_VERSION, LEGACY_TEAMS, LIMITS, PATH_COLORS, PLAYER_COLORS } from './limits.js';
+import { BOUNDS, FORMAT_NAME, FORMAT_VERSION, LABEL_POSITIONS, LEGACY_TEAMS, LIMITS, PATH_COLORS, PLAYER_COLORS } from './limits.js';
 import type {
   Ball,
   DrillSource,
   ErrorKey,
+  Hand,
   Item,
+  LabelPosition,
   ParseError,
   ParseResult,
   PathColor,
@@ -54,6 +56,10 @@ const MESSAGES: Record<ErrorKey, string> = {
   bad_court: 'The court must be a whole number from 1 to the number of courts.',
   bad_courts: `The courts must be a list of ${LIMITS.courts.min} to ${LIMITS.courts.max} objects.`,
   bad_legend: `The legend must be a list of at most ${LIMITS.legendEntries} notes, each an object with text.`,
+  bad_moment: `A moment must be a whole number from ${LIMITS.moments.min} to ${LIMITS.moments.max}.`,
+  bad_hand: 'The hand must be "right" or "left".',
+  bad_tether: `A tether name must be 1 to ${LIMITS.tetherLength} characters on one line, shared by at most two players on a court in one moment.`,
+  bad_label_position: `The label position must be one of ${LABEL_POSITIONS.map((p) => `"${p}"`).join(', ')}.`,
   no_svg_source: 'That SVG has no diagram source in it. Only SVGs made by drillplot can be reopened.',
   bad_svg_source: 'The source inside that SVG is damaged.',
   empty_input: 'Paste an SVG or JSON first.',
@@ -144,6 +150,38 @@ function optKey(c: Collector, raw: Record<string, unknown>, path: string): strin
   return raw['key'] === undefined ? undefined : key(c, raw['key'], `${path}/key`);
 }
 
+function optHand(c: Collector, raw: Record<string, unknown>, path: string): Hand | undefined {
+  const v = raw['hand'];
+  if (v === undefined) return undefined;
+  if (v === 'right' || v === 'left') return v;
+  c.add('bad_hand', `${path}/hand`);
+  return undefined;
+}
+
+function optTether(c: Collector, raw: Record<string, unknown>, path: string): string | undefined {
+  const v = raw['tether'];
+  if (v === undefined) return undefined;
+  if (typeof v === 'string' && v.trim() !== '' && len(v) <= LIMITS.tetherLength && !BAD_ONE_LINE.test(v)) return v;
+  c.add('bad_tether', `${path}/tether`);
+  return undefined;
+}
+
+function optLabelAt(c: Collector, raw: Record<string, unknown>, path: string): LabelPosition | undefined {
+  const v = raw['labelAt'];
+  if (v === undefined) return undefined;
+  if (typeof v === 'string' && (LABEL_POSITIONS as readonly string[]).includes(v)) return v as LabelPosition;
+  c.add('bad_label_position', `${path}/labelAt`);
+  return undefined;
+}
+
+function optMoment(c: Collector, raw: Record<string, unknown>, path: string): number | undefined {
+  const v = raw['moment'];
+  if (v === undefined) return undefined;
+  if (typeof v === 'number' && Number.isInteger(v) && v >= LIMITS.moments.min && v <= LIMITS.moments.max) return v;
+  c.add('bad_moment', `${path}/moment`);
+  return undefined;
+}
+
 function optCourt(c: Collector, raw: Record<string, unknown>, path: string, courts: number): number | undefined {
   const v = raw['court'];
   if (v === undefined) return undefined;
@@ -173,7 +211,13 @@ function item(c: Collector, raw: unknown, path: string, courts = 1): Item | unde
       const t = team(c, raw['team'], `${path}/team`);
       out = withExtras(
         { type: 'player', x: x ?? 0, y: y ?? 0, label, team: t },
-        { note: optText(c, raw, 'note', path, LIMITS.noteLength), ghost: optFlag(c, raw, 'ghost', path), key: optKey(c, raw, path) },
+        {
+          note: optText(c, raw, 'note', path, LIMITS.noteLength),
+          ghost: optFlag(c, raw, 'ghost', path),
+          key: optKey(c, raw, path),
+          hand: optHand(c, raw, path),
+          tether: optTether(c, raw, path),
+        },
       );
       break;
     }
@@ -204,6 +248,18 @@ function item(c: Collector, raw: unknown, path: string, courts = 1): Item | unde
       const h = num(c, raw['h'], `${path}/h`, [LIMITS.zoneHeight.min, LIMITS.zoneHeight.max], 'bad_size');
       const label = text(c, raw['label'], `${path}/label`, LIMITS.zoneLabelLength, 'label_too_long');
       out = withExtras({ type: 'zone', x: x ?? 0, y: y ?? 0, w: w ?? 1, h: h ?? 1, label }, { ghost: optFlag(c, raw, 'ghost', path), key: optKey(c, raw, path) });
+      break;
+    }
+    case 'region': {
+      const x = num(c, raw['x'], `${path}/x`, X);
+      const y = num(c, raw['y'], `${path}/y`, Y);
+      const w = num(c, raw['w'], `${path}/w`, [LIMITS.regionWidth.min, LIMITS.regionWidth.max], 'bad_size');
+      const h = num(c, raw['h'], `${path}/h`, [LIMITS.regionHeight.min, LIMITS.regionHeight.max], 'bad_size');
+      const label = text(c, raw['label'], `${path}/label`, LIMITS.regionLabelLength, 'label_too_long');
+      out = withExtras(
+        { type: 'region', x: x ?? 0, y: y ?? 0, w: w ?? 1, h: h ?? 1, label },
+        { labelAt: optLabelAt(c, raw, path), mirror: optFlag(c, raw, 'mirror', path), key: optKey(c, raw, path) },
+      );
       break;
     }
     case 'mark': {
@@ -260,7 +316,21 @@ function item(c: Collector, raw: unknown, path: string, courts = 1): Item | unde
   }
   const court = optCourt(c, raw, path, courts);
   if (out && court !== undefined) out.court = court;
+  const moment = optMoment(c, raw, path);
+  if (out && moment !== undefined) out.moment = moment;
   return c.errors.length > before ? undefined : out;
+}
+
+/** Each tether joins two players: a third on the same court, in the same moment, is an error. */
+function checkTethers(c: Collector, items: ReadonlyArray<readonly [Item, number]>): void {
+  const seen = new Map<string, number>();
+  for (const [it, i] of items) {
+    if (it.type !== 'player' || it.tether === undefined) continue;
+    const k = JSON.stringify([it.court ?? 1, it.moment ?? 0, it.tether]);
+    const n = (seen.get(k) ?? 0) + 1;
+    seen.set(k, n);
+    if (n > 2) c.add('bad_tether', `/items/${i}/tether`);
+  }
 }
 
 function courtList(c: Collector, v: unknown): DrillSource['courts'] {
@@ -285,9 +355,10 @@ function legendList(c: Collector, v: unknown): DrillSource['legend'] {
   return v.map((r, i) => {
     const k = optKey(c, r, `/legend/${i}`);
     const color = optColor(c, r, `/legend/${i}`);
+    const tether = r['tether'] === undefined ? undefined : team(c, r['tether'], `/legend/${i}/tether`);
     // text is required: an absent one is not text
     const t = text(c, r['text'] ?? null, `/legend/${i}/text`, LIMITS.legendTextLength, 'label_too_long');
-    return { ...(k !== undefined ? { key: k } : {}), ...(color ? { color } : {}), text: t };
+    return { ...(k !== undefined ? { key: k } : {}), ...(color ? { color } : {}), ...(tether ? { tether } : {}), text: t };
   });
 }
 
@@ -334,11 +405,17 @@ export function parseSource(input: unknown): ParseResult {
   const raw = value['items'];
   if (!Array.isArray(raw)) c.add('items_not_array', '/items');
   else if (raw.length > LIMITS.maxItems) c.add('too_many_items', '/items');
-  else
+  else {
+    const placed: Array<readonly [Item, number]> = [];
     raw.forEach((r, i) => {
       const it = item(c, r, `/items/${i}`, courts?.length ?? 1);
-      if (it) items.push(it);
+      if (it) {
+        items.push(it);
+        placed.push([it, i]);
+      }
     });
+    checkTethers(c, placed);
+  }
   if (c.errors.length) return { ok: false, errors: c.errors };
   const source: DrillSource = { format: FORMAT_NAME, version: FORMAT_VERSION, title, caption, view, side, orient, items };
   if (showCaption) source.showCaption = true;

@@ -1,0 +1,28 @@
+{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Where each team is: back, in transition, at the kitchen",
+ "caption": "The serve (1) and the return (2) must both bounce, so the serving team stays back while the receiver follows the return in to the kitchen line.",
+ "view": "full",
+ "side": "bottom",
+ "orient": "portrait",
+ "legend": [
+  { "text": "S serves and R receives; P is each one's partner." },
+  { "key": "1", "text": "The serve, deep. It must bounce before it is returned." },
+  { "key": "2", "text": "The return, deep. It must bounce too, so the serving team stays back." },
+  { "key": "in", "text": "R follows the return in, through transition, to the kitchen line." }
+ ],
+ "items": [
+  { "type": "region", "x": 0, "y": -2, "w": 20, "h": 6, "label": "back", "labelAt": "left", "mirror": true },
+  { "type": "region", "x": 0, "y": 4, "w": 20, "h": 8.5, "label": "in transition", "labelAt": "left", "mirror": true },
+  { "type": "region", "x": 0, "y": 12.5, "w": 20, "h": 2.5, "label": "at the kitchen", "mirror": true },
+  { "type": "player", "x": 5, "y": -0.75, "label": "S", "team": "blue" },
+  { "type": "player", "x": 15, "y": -0.75, "label": "P", "team": "blue" },
+  { "type": "player", "x": 16.5, "y": 44.5, "label": "R", "team": "orange", "moment": 1 },
+  { "type": "player", "x": 16.5, "y": 30.25, "label": "R", "team": "orange", "moment": 2 },
+  { "type": "player", "x": 3.5, "y": 30.25, "label": "P", "team": "orange" },
+  { "type": "move", "x1": 16.5, "y1": 42.9, "x2": 16.5, "y2": 32, "key": "in" },
+  { "type": "ball", "x1": 5.4, "y1": 0.4, "x2": 15.2, "y2": 41, "n": 1 },
+  { "type": "ball", "x1": 15.6, "y1": 43.4, "x2": 11.5, "y2": 2.6, "n": 2 }
+ ]
+}

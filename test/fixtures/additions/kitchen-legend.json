@@ -1,0 +1,21 @@
+{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Dink cross-court, kitchen view with a legend",
+ "caption": "A kitchen view with a legend and a printed caption: the court is clipped to its frame.",
+ "view": "kitchen",
+ "side": "bottom",
+ "orient": "portrait",
+ "showCaption": true,
+ "legend": [
+  { "key": "1", "text": "A dinks cross-court to C." },
+  { "key": "2", "text": "C dinks it back." }
+ ],
+ "items": [
+  { "type": "player", "x": 4, "y": 30, "label": "A", "team": "orange", "hand": "left" },
+  { "type": "player", "x": 16, "y": 14, "label": "C", "team": "blue", "hand": "right" },
+  { "type": "player", "x": 16, "y": 44, "label": "B", "team": "orange" },
+  { "type": "ball", "x1": 4.5, "y1": 28.5, "x2": 15.5, "y2": 15.5, "curve": true, "bend": 1, "n": 1 },
+  { "type": "ball", "x1": 15, "y1": 15.5, "x2": 5, "y2": 28.5, "curve": true, "bend": 1, "n": 2 }
+ ]
+}

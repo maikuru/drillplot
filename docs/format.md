@@ -258,6 +258,67 @@ A source with a `legend`, `showCaption` or `courts` is drawn on a white page: th
 }
 ```
 
+## Additions after 0.2 (unreleased)
+
+These are in the Unreleased section of the [changelog](../CHANGELOG.md): optional, still format version 1, and under the same rules as [the 0.2 additions](#additions-in-02). A reader does not fill them in, so a document written for 0.1 or 0.2 normalizes, saves and draws exactly as it did. They let one figure show a pair moving together, a rally in two moments, the named regions of the court and which side is each player's forehand. A 0.2 package drops `moment`, `hand`, `tether`, `labelAt`, `mirror` and a legend `tether` on save, and refuses a `region` with `unknown_item_type`.
+
+`stringifySource` writes them last on each item, in this order: `hand` and `tether` on a player after `key`, `labelAt`, `mirror` and `key` on a region after `label`, then `court`, then `moment` on every item. A legend note writes `tether` after `color`.
+
+### Moments
+
+Every item may carry **`moment`**, a whole number from 1 to 9: the moment of a sequence it belongs to, such as "before" (1) and "after" (2). On each court, the latest moment is the highest one there. An item of an **earlier** moment is drawn faded, and a player of an earlier moment is drawn as a ring in its team color with its letter inside, rather than as a disc. Items with no `moment` belong to every moment and are drawn as usual, so a figure can show what stays put (the other team, say) once.
+
+A player with `ghost: true` and a `moment` is drawn as the same ring in its team color, whatever its moment. A `ghost` with no `moment` is the dashed white ring of 0.2, unchanged.
+
+### Tethers
+
+A player may carry **`tether`**, a name for a pair: 1 to 8 characters, one line, not only spaces. Two players on the same court, in the same moment (or both with none), with the same `tether` are joined by a tether, a cased line drawn from disc edge to disc edge in the first player's team color, under the players. It follows the players wherever they are, and it fades with its moment. The same name may be used in each moment, so a pair in moment 1 and the same pair in moment 2 are each joined. A third player with the same name on that court in that moment is `bad_tether`; the JSON Schema cannot check that, only the reader can.
+
+A legend note with no `key` and no `color` may carry **`tether`**, a player color, to draw a short tether as its swatch.
+
+### Named regions
+
+A **`region`** names an area of the court: "back", "in transition", "the kitchen", a service court. It is a neutral shaded box with a thin outline, drawn under everything else, unlike the orange target `zone`.
+
+| Field | Type | Required | Default | Meaning |
+| --- | --- | --- | --- | --- |
+| `type` | `"region"` | yes | | |
+| `x`, `y` | number | yes | | Top-left corner, in feet. |
+| `w`, `h` | number | yes | | Width 0.5 to 24 feet, height 0.5 to 48 feet, so a region may cover the margin too. |
+| `label` | string | no | `""` | Up to 24 characters, one line. |
+| `labelAt` | string | no | `"center"` | Where the label sits **as the region is drawn on the page**: `center`, `top`, `bottom`, `left`, `right`, `top-left`, `top-right`, `bottom-left` or `bottom-right`, inset from that side. It stays on that side of the page in landscape. |
+| `mirror` | boolean | no | `false` | Also drawn reflected across the net (`y` becomes `44 - y - h`), with the same label. A band across both halves is one item. |
+| `key` | string | no | | A [badge](#legend-and-badges) in the top-left corner of the first box. |
+
+### Handedness
+
+A player may carry **`hand`**, `"right"` or `"left"`: the dominant hand. A small paddle is drawn beside the disc on the forehand side. A player faces the net, so a right-hander on the near half (`y` of 22 or more) has the forehand to page right, and on the far half to page left; in landscape the paddle turns with the court.
+
+### Clipping a single court
+
+A kitchen or half view with a `legend` or `showCaption` is now clipped to its frame in a nested `<svg>` viewport, as each of several courts already was, so the court and its pieces stop at the frame instead of running on under the legend. A full view draws nothing outside its frame and is drawn exactly as before.
+
+### An example of the additions
+
+```json
+{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Shift together",
+ "caption": "The pair shifts right together; the gap between them stays the same.",
+ "legend": [{ "tether": "orange", "text": "The tether: the gap between partners." }],
+ "items": [
+  { "type": "region", "x": 0, "y": 29, "w": 20, "h": 2.5, "label": "at the kitchen", "labelAt": "left", "mirror": true },
+  { "type": "player", "x": 3, "y": 30, "label": "A", "team": "orange", "hand": "right", "tether": "AB", "moment": 1 },
+  { "type": "player", "x": 10, "y": 30, "label": "B", "team": "orange", "hand": "right", "tether": "AB", "moment": 1 },
+  { "type": "player", "x": 10, "y": 30, "label": "A", "team": "orange", "hand": "right", "tether": "AB", "moment": 2 },
+  { "type": "player", "x": 17, "y": 30, "label": "B", "team": "orange", "hand": "right", "tether": "AB", "moment": 2 },
+  { "type": "ball", "x1": 5, "y1": 15, "x2": 3, "y2": 28.5, "n": 1, "moment": 1 },
+  { "type": "ball", "x1": 15, "y1": 15, "x2": 17, "y2": 28.5, "n": 2, "moment": 2 }
+ ]
+}
+```
+
 ## Text rules
 
 `title`, `label` (player, zone and, since 0.2, cone and line), `caption`, and the 0.2 `note`, `key`, legend `text`, and court `label` and `link` are plain text; markup in them is not an error because it is text, and the renderer escapes it.
@@ -290,6 +351,11 @@ A source with a `legend`, `showCaption` or `courts` is drawn on a white page: th
 | Legend notes (0.2) | 20, each up to 100 characters | `bad_legend`, `label_too_long` |
 | Courts (0.2) | 1 to 4; label 24, link 40 characters | `bad_courts`, `label_too_long` |
 | Item `court` (0.2) | 1 to the number of courts | `bad_court` |
+| Item `moment` (unreleased) | 1 to 9, whole | `bad_moment` |
+| Player `tether` (unreleased) | 1 to 8 characters, not only spaces; at most two players per name, court and moment | `bad_tether` |
+| Region label (unreleased) | 24 characters | `label_too_long` |
+| Region width `w` (unreleased) | 0.5 to 24 feet | `bad_size` |
+| Region height `h` (unreleased) | 0.5 to 48 feet | `bad_size` |
 
 These are exported from the package as `LIMITS`, `COURT` and `BOUNDS`. Range checks use the number as written, before rounding: `-2.004` is out of bounds even though it would round to `-2`. A number must be a finite JSON number; `"7"` (a string), `null` and `NaN` are `not_a_number`.
 
@@ -310,7 +376,7 @@ The JSON Schema describes the shape and the limits, but it does not round or fil
 The renderer ([`renderSvg`](api.md#rendersvgsource-options)) draws, back to front:
 
 1. The court: grass, the court surface, the two kitchens in a darker blue, the lines, the labels "Kitchen", and the net.
-2. Items by layer: zones, lines, cones, machines, players, movement arrows, ball paths, marks. Within a layer the order in `items` is kept. (Lines and marks are since 0.2.)
+2. Items by layer: regions, zones, lines, cones, machines, tethers, players, movement arrows, ball paths, marks. Within a layer the order in `items` is kept. (Lines and marks are since 0.2; regions and tethers are unreleased.) An item of an earlier [moment](#moments) is drawn faded in its layer.
 3. Since 0.2, the legend and the visible caption under the court; see [Drawing the additions](#drawing-the-additions).
 
 So a ball path is always above a player, whatever their order in the list. The SVG's own `width` and `height` are 16 pixels per foot of the frame. In greyscale mode every color becomes its luma grey; this is for display and the editor never exports it.
@@ -443,21 +509,25 @@ bad_shot_number  /items/1/n
 | `items_not_array` | `items` is missing or is not an array. | `/items` |
 | `too_many_items` | More than 200 items. No item is checked then. | `/items` |
 | `item_not_object` | An item is not an object (`null`, a number, an array). | `/items/N` |
-| `unknown_item_type` | `type` is missing or not one of `player`, `machine`, `cone`, `zone`, `move`, `ball`, `line`, `mark`. | `/items/N/type` |
+| `unknown_item_type` | `type` is missing or not one of `player`, `machine`, `cone`, `zone`, `move`, `ball`, `line`, `mark`, `region`. | `/items/N/type` |
 | `not_a_number` | A coordinate, size or angle is missing, not a number, or not finite. | the field |
 | `out_of_bounds` | A position is outside -2 to 22 (`x`) or -2 to 46 (`y`). | the field |
-| `bad_size` | A zone `w` or `h` is outside 1 to 20 or 1 to 44. | `/items/N/w`, `/h` |
+| `bad_size` | A zone `w` or `h` is outside 1 to 20 or 1 to 44, or a region's outside 0.5 to 24 or 0.5 to 48. | `/items/N/w`, `/h` |
 | `bad_angle` | A machine `angle` is below 0 or 360 or above. | `/items/N/angle` |
-| `bad_team` | A player `team` is not a known color or legacy key. | `/items/N/team` |
+| `bad_team` | A player `team`, or a legend `tether`, is not a known color or legacy key. | `/items/N/team`, `/legend/N/tether` |
 | `bad_bend` | A ball `bend` is not `1` or `-1`. | `/items/N/bend` |
 | `bad_shot_number` | A ball `n` is missing, not a whole number, or outside 1 to 200. | `/items/N/n` |
-| `not_boolean` | A ball `curve`, or a 0.2 `dash`, `ghost` or `showCaption`, is not `true` or `false`. | the field |
+| `not_boolean` | A ball `curve`, a 0.2 `dash`, `ghost` or `showCaption`, or a region `mirror`, is not `true` or `false`. | the field |
 | `bad_color` | Since 0.2. A `color` is not a path color. | `/items/N/color`, `/legend/N/color` |
 | `bad_key` | Since 0.2. A `key` is not 1 to 3 characters of one-line text, or is only spaces; or a `mark` has none. | `/items/N/key`, `/legend/N/key` |
 | `bad_alt` | Since 0.2. A ball `alt` is not one letter `a` to `z`. | `/items/N/alt` |
 | `bad_court` | Since 0.2. An item's `court` is not a whole number from 1 to the number of courts. | `/items/N/court` |
 | `bad_courts` | Since 0.2. `courts` is not a list of 1 to 4 objects. | `/courts` |
 | `bad_legend` | Since 0.2. `legend` is not a list of at most 20 objects. A note without `text` is `not_text`. | `/legend` |
+| `bad_moment` | Unreleased. An item's `moment` is not a whole number from 1 to 9. | `/items/N/moment` |
+| `bad_hand` | Unreleased. A player's `hand` is not `right` or `left`. | `/items/N/hand` |
+| `bad_tether` | Unreleased. A player's `tether` is not 1 to 8 characters of one-line text, or is only spaces; or a third player on that court, in that moment, has the same one. | `/items/N/tether` |
+| `bad_label_position` | Unreleased. A region's `labelAt` is not one of the nine positions. | `/items/N/labelAt` |
 | `empty_input` | `parseText` was given empty or whitespace-only text. | `""` |
 | `no_svg_source` | `parseText` was given an SVG with no embedded source (not made by drillplot). | `""` |
 | `bad_svg_source` | `parseText` found a source in the SVG but it is not valid JSON. | `""` |

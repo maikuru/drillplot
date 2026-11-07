@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.5 -22.5 49 25" width="784" height="400" role="img" aria-label="Named regions, landscape" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif">
+<title>Named regions, landscape</title>
+<desc>Regions with their labels in each position, on a court turned a quarter turn.</desc>
+<metadata>{
+ "format": "drill-diagram",
+ "version": 1,
+ "title": "Named regions, landscape",
+ "caption": "Regions with their labels in each position, on a court turned a quarter turn.",
+ "view": "full",
+ "side": "bottom",
+ "orient": "landscape",
+ "items": [
+  {
+   "type": "region",
+   "x": 0,
+   "y": 0,
+   "w": 10,
+   "h": 15,
+   "label": "left service",
+   "labelAt": "top-left",
+   "mirror": true
+  },
+  {
+   "type": "region",
+   "x": 10,
+   "y": 0,
+   "w": 10,
+   "h": 15,
+   "label": "right service",
+   "labelAt": "bottom-right",
+   "mirror": true
+  },
+  {
+   "type": "region",
+   "x": 0,
+   "y": 15,
+   "w": 20,
+   "h": 14,
+   "label": "kitchen (7 ft)",
+   "labelAt": "top",
+   "key": "K"
+  },
+  {
+   "type": "player",
+   "x": 6,
+   "y": 36,
+   "label": "A",
+   "team": "white",
+   "hand": "left",
+   "tether": "1"
+  },
+  {
+   "type": "player",
+   "x": 14,
+   "y": 36,
+   "label": "B",
+   "team": "white",
+   "hand": "right",
+   "tether": "1"
+  },
+  {
+   "type": "player",
+   "x": 6,
+   "y": 8,
+   "label": "C",
+   "team": "black",
+   "ghost": true,
+   "tether": "2",
+   "moment": 1
+  },
+  {
+   "type": "player",
+   "x": 14,
+   "y": 8,
+   "label": "D",
+   "team": "black",
+   "ghost": true,
+   "tether": "2",
+   "moment": 1
+  }
+ ]
+}</metadata>
+<g transform="rotate(-90)"><rect x="-2.5" y="-2.5" width="25" height="49" fill="#6a6a6a"/><rect x="0" y="0" width="20" height="44" fill="#626262"/><rect x="0" y="15" width="20" height="7" fill="#4f4f4f"/><rect x="0" y="22" width="20" height="7" fill="#4f4f4f"/><rect x="0" y="0" width="20" height="44" stroke="#ffffff" stroke-width="0.2" fill="none"/><path d="M0 15H20M0 29H20M10 0V15M10 29V44" stroke="#ffffff" stroke-width="0.2" fill="none"/><text x="10" y="18.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 10 18.5)">Kitchen</text><text x="10" y="25.5" dy="0.35em" font-size="1.3" fill="#ffffff" fill-opacity="0.55" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 10 25.5)">Kitchen</text><rect x="-1" y="21.82" width="22" height="0.36" fill="#f4f4f4" stroke="#1a1a1a" stroke-width="0.07"/>
+<rect x="0" y="0" width="10" height="15" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.7" stroke-width="0.12"/><text x="9.1" y="0.6" dy="0.35em" font-size="1" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="start" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 9.1 0.6)">left service</text><rect x="0" y="29" width="10" height="15" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.7" stroke-width="0.12"/><text x="9.1" y="29.6" dy="0.35em" font-size="1" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="start" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 9.1 29.6)">left service</text>
+<rect x="10" y="0" width="10" height="15" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.7" stroke-width="0.12"/><text x="10.9" y="14.4" dy="0.35em" font-size="1" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="end" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 10.9 14.4)">right service</text><rect x="10" y="29" width="10" height="15" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.7" stroke-width="0.12"/><text x="10.9" y="43.4" dy="0.35em" font-size="1" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="end" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 10.9 43.4)">right service</text>
+<rect x="0" y="15" width="20" height="14" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.7" stroke-width="0.12"/><text x="19.1" y="22" dy="0.35em" font-size="1" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.2" paint-order="stroke" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 19.1 22)">kitchen (7 ft)</text><circle cx="0.9" cy="15.9" r="0.75" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.12"/><text x="0.9" y="15.9" dy="0.35em" font-size="0.94" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 0.9 15.9)">K</text>
+<path d="M7.3 36L12.7 36" fill="none" stroke="#1a1a1a" stroke-width="0.62" stroke-linecap="round"/><path d="M7.3 36L12.7 36" fill="none" stroke="#ffffff" stroke-width="0.34" stroke-linecap="round"/><path d="M7.3 8L12.7 8" fill="none" stroke="#ffffff" stroke-width="0.62" stroke-linecap="round"/><path d="M7.3 8L12.7 8" fill="none" stroke="#1a1a1a" stroke-width="0.34" stroke-linecap="round"/>
+<circle cx="6" cy="36" r="1.3" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.14"/><text x="6" y="36" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 6 36)">A</text><path d="M4.7 36H4.45" stroke="#1a1a1a" stroke-width="0.22"/><ellipse cx="4.03" cy="36" rx="0.45" ry="0.6" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.12"/>
+<circle cx="14" cy="36" r="1.3" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.14"/><text x="14" y="36" dy="0.35em" font-size="1.5" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 14 36)">B</text><path d="M15.3 36H15.55" stroke="#1a1a1a" stroke-width="0.22"/><ellipse cx="15.97" cy="36" rx="0.45" ry="0.6" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.12"/>
+<circle cx="6" cy="8" r="1.1" fill="#1a1a1a" fill-opacity="0.2" stroke="#1a1a1a" stroke-width="0.4"/><circle cx="6" cy="8" r="1.3" fill="none" stroke="#ffffff" stroke-width="0.16" stroke-dasharray="0.45 0.35"/><text x="6" y="8" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.22" paint-order="stroke" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 6 8)">C</text>
+<circle cx="14" cy="8" r="1.1" fill="#1a1a1a" fill-opacity="0.2" stroke="#1a1a1a" stroke-width="0.4"/><circle cx="14" cy="8" r="1.3" fill="none" stroke="#ffffff" stroke-width="0.16" stroke-dasharray="0.45 0.35"/><text x="14" y="8" dy="0.35em" font-size="1.5" font-weight="700" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.22" paint-order="stroke" text-anchor="middle" font-family="Arial, Helvetica, 'Helvetica Neue', sans-serif" transform="rotate(90 14 8)">D</text>
+</g>
+</svg>

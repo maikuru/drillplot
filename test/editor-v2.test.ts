@@ -156,3 +156,38 @@ describe('<drillplot-editor> with the 0.2 fields', () => {
     expect(css).toMatch(/\.side \{[^}]*overflow: auto/);
   });
 });
+
+describe('<drillplot-editor> with the unreleased additions', () => {
+  const extra = resolve(process.cwd(), 'test/fixtures/additions');
+  const docs = readdirSync(extra)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => {
+      const r = parseSource(readFileSync(resolve(extra, f), 'utf8'));
+      if (!r.ok) throw new Error(f);
+      return [f, r.source] as [string, DrillSource];
+    });
+
+  it.each(docs)('%s loads and saves unchanged, and exports the same SVG', (_f, src) => {
+    const el = make();
+    el.source = src;
+    expect(el.source).toEqual(src);
+    expect(el.getSvg()).toBe(renderSvg(src));
+  });
+
+  it('draws tethers and faded moments on the court being edited', () => {
+    const el = make();
+    el.source = docs.find(([f]) => f === 'shift-together.json')![1];
+    const stage = el.shadowRoot!.querySelector('svg')!.innerHTML;
+    expect(stage).toContain('stroke-width="0.62"');
+    expect(stage).toContain('opacity="0.45"');
+  });
+
+  it('edits a region’s label and size', () => {
+    const el = make();
+    el.source = { ...sampleDrill(), items: [{ type: 'region', x: 0, y: 29, w: 20, h: 2.5, label: 'band' }] };
+    selectItem(el, 0);
+    type(q<HTMLInputElement>(el, 'sel-label'), 'at the kitchen');
+    type(q<HTMLInputElement>(el, 'sel-h'), '3');
+    expect(el.source.items[0]).toEqual({ type: 'region', x: 0, y: 29, w: 20, h: 3, label: 'at the kitchen' });
+  });
+});

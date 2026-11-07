@@ -4,7 +4,7 @@ import { parseSource } from '../format/parse.js';
 import { ballItems, hasShotGap } from '../format/shots.js';
 import type { DrillSource, Item, ParseError, ParseResult, PathColor } from '../format/types.js';
 import { arrowGeom, countOffView, courtView, drawOrder, viewBox } from '../render/geometry.js';
-import { courtMarkup, esc, itemMarkup } from '../render/markup.js';
+import { courtMarkup, esc, itemsMarkup } from '../render/markup.js';
 import { renderSvg } from '../render/svg.js';
 import { stringifySource } from '../format/open.js';
 import { clamp, clampX, clampY, DrillModel, KIND_NAME, moveBy, nextKey, round2, snapFt, type EditorItem, type Kind } from './model.js';
@@ -47,6 +47,8 @@ function itemName(it: Item): string {
       return 'Line' + (it.label ? ' ' + it.label : '');
     case 'mark':
       return 'Legend badge ' + it.key;
+    case 'region':
+      return 'Region' + (it.label ? ' ' + it.label : '');
   }
 }
 
@@ -56,9 +58,9 @@ function setOpt<T extends object, K extends keyof T>(obj: T, k: K, v: T[K] | '' 
   else obj[k] = v as T[K];
 }
 
-const POINT_KINDS = new Set(['player', 'machine', 'cone', 'zone', 'mark']);
-const KEYED = new Set(['player', 'machine', 'cone', 'zone', 'move', 'line', 'mark']);
-const LABEL_MAX: Partial<Record<Item['type'], number>> = { player: LIMITS.playerLabelLength, zone: LIMITS.zoneLabelLength, cone: LIMITS.coneLabelLength, line: LIMITS.lineLabelLength };
+const POINT_KINDS = new Set(['player', 'machine', 'cone', 'zone', 'mark', 'region']);
+const KEYED = new Set(['player', 'machine', 'cone', 'zone', 'move', 'line', 'mark', 'region']);
+const LABEL_MAX: Partial<Record<Item['type'], number>> = { player: LIMITS.playerLabelLength, zone: LIMITS.zoneLabelLength, cone: LIMITS.coneLabelLength, line: LIMITS.lineLabelLength, region: LIMITS.regionLabelLength };
 
 /**
  * <drillplot-editor>: draw a pickleball drill on a to-scale court.
@@ -204,9 +206,7 @@ export class DrillplotEditor extends HTMLElement {
     this.stage.innerHTML =
       world +
       courtMarkup(courtView(m.meta.view, m.meta.side), ctx) +
-      drawOrder(m.onCourt())
-        .map((it) => `<g class="piece" data-id="${it.id}">${itemMarkup(it, ctx)}${this.hit(it)}</g>`)
-        .join('') +
+      itemsMarkup(m.onCourt(), ctx, (it, svg) => `<g class="piece" data-id="${it.id}">${svg}${this.hit(it)}</g>`).join('') +
       `<g>${this.overlay()}</g></g>`;
     this.stage.classList.toggle('drawing', this.tool !== 'select' || !!this.armed);
     if (full) this.syncUI();
@@ -235,6 +235,7 @@ export class DrillplotEditor extends HTMLElement {
       case 'mark':
         return `<circle class="sel-ring" cx="${it.x}" cy="${it.y}" r="1.4"/>`;
       case 'zone':
+      case 'region':
         return `<rect class="sel-ring" x="${it.x - 0.2}" y="${it.y - 0.2}" width="${it.w + 0.4}" height="${it.h + 0.4}"/>` + H('corner', it.x + it.w, it.y + it.h, true);
       default: {
         const g = arrowGeom(it.type === 'ball' ? it : { ...it, curve: false });
@@ -313,7 +314,7 @@ export class DrillplotEditor extends HTMLElement {
       this.setText('insp-name', itemName(it));
       const labelMax = LABEL_MAX[it.type];
       this.$('g-label').hidden = labelMax === undefined;
-      this.$('sel-label-l').textContent = it.type === 'player' ? 'Label' : it.type === 'zone' ? 'Zone label (optional)' : it.type === 'cone' ? 'Cone name (optional), such as T1' : 'Line label (optional)';
+      this.$('sel-label-l').textContent = it.type === 'player' ? 'Label' : it.type === 'zone' ? 'Zone label (optional)' : it.type === 'region' ? 'Region label (optional)' : it.type === 'cone' ? 'Cone name (optional), such as T1' : 'Line label (optional)';
       if (labelMax !== undefined) this.input('sel-label').maxLength = labelMax;
       this.$('g-team').hidden = it.type !== 'player';
       this.$('g-note').hidden = it.type !== 'player';
@@ -331,17 +332,17 @@ export class DrillplotEditor extends HTMLElement {
       if (it.type !== 'ball') this.setIfIdle('sel-key', it.key ?? '');
       this.$('g-ball').hidden = it.type !== 'ball';
       this.$('g-aim').hidden = it.type !== 'machine';
-      this.$('g-zone').hidden = it.type !== 'zone';
+      this.$('g-zone').hidden = it.type !== 'zone' && it.type !== 'region';
       this.$('g-pos').hidden = !POINT_KINDS.has(it.type);
       this.$('g-pos2').hidden = POINT_KINDS.has(it.type);
-      if (it.type === 'player' || it.type === 'zone' || it.type === 'cone' || it.type === 'line') this.setIfIdle('sel-label', it.label ?? '');
+      if (it.type === 'player' || it.type === 'zone' || it.type === 'region' || it.type === 'cone' || it.type === 'line') this.setIfIdle('sel-label', it.label ?? '');
       if (it.type === 'player') (this.$('sel-team') as HTMLSelectElement).value = it.team;
       if (it.type === 'ball') this.input('sel-curve').checked = it.curve;
       if (it.type === 'machine') {
         this.setIfIdle('sel-aim', it.angle);
         this.$('sel-aim-v').textContent = String(it.angle);
       }
-      if (it.type === 'zone') {
+      if (it.type === 'zone' || it.type === 'region') {
         this.setIfIdle('sel-w', round2(it.w));
         this.setIfIdle('sel-h', round2(it.h));
       }
@@ -571,9 +572,10 @@ export class DrillplotEditor extends HTMLElement {
       } else if (d.mode === 'handle' && d.h === 'p1' && 'x1' in it) {
         it.x1 = clampX(p.x);
         it.y1 = clampY(p.y);
-      } else if (d.mode === 'handle' && d.h === 'corner' && it.type === 'zone') {
-        it.w = round2(clamp(snapFt(p.x - it.x), LIMITS.zoneWidth.min, Math.min(LIMITS.zoneWidth.max, 22 - it.x)));
-        it.h = round2(clamp(snapFt(p.y - it.y), LIMITS.zoneHeight.min, Math.min(LIMITS.zoneHeight.max, 46 - it.y)));
+      } else if (d.mode === 'handle' && d.h === 'corner' && (it.type === 'zone' || it.type === 'region')) {
+        const [W, H] = it.type === 'zone' ? [LIMITS.zoneWidth, LIMITS.zoneHeight] : [LIMITS.regionWidth, LIMITS.regionHeight];
+        it.w = round2(clamp(snapFt(p.x - it.x), W.min, Math.min(W.max, 22 - it.x)));
+        it.h = round2(clamp(snapFt(p.y - it.y), H.min, Math.min(H.max, 46 - it.y)));
       }
       this.render(false);
     });
@@ -728,7 +730,7 @@ export class DrillplotEditor extends HTMLElement {
     });
     label.addEventListener('input', () => {
       const it = cur();
-      if (it && (it.type === 'player' || it.type === 'zone')) it.label = label.value;
+      if (it && (it.type === 'player' || it.type === 'zone' || it.type === 'region')) it.label = label.value;
       else if (it && (it.type === 'cone' || it.type === 'line')) setOpt(it, 'label', label.value);
       else return;
       this.render();
@@ -784,10 +786,11 @@ export class DrillplotEditor extends HTMLElement {
       this.$(id).addEventListener('change', (e) =>
         m.act(() => {
           const it = cur();
-          if (it?.type !== 'zone') return;
+          if (it?.type !== 'zone' && it?.type !== 'region') return;
           const raw = +(e.target as HTMLInputElement).value || 1;
-          if (id === 'sel-w') it.w = round2(clamp(raw, LIMITS.zoneWidth.min, LIMITS.zoneWidth.max));
-          else it.h = round2(clamp(raw, LIMITS.zoneHeight.min, LIMITS.zoneHeight.max));
+          const [W, H] = it.type === 'zone' ? [LIMITS.zoneWidth, LIMITS.zoneHeight] : [LIMITS.regionWidth, LIMITS.regionHeight];
+          if (id === 'sel-w') it.w = round2(clamp(raw, W.min, W.max));
+          else it.h = round2(clamp(raw, H.min, H.max));
         }),
       ),
     );

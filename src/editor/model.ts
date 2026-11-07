@@ -253,8 +253,8 @@ export class DrillModel {
 /** Moves any item by (dx, dy), clamped so it stays in bounds. Arrows move as a whole. */
 export function moveBy(it: Item, dx: number, dy: number, from: Item): void {
   if ('x' in it && 'x' in from) {
-    const w = it.type === 'zone' ? it.w : 0;
-    const h = it.type === 'zone' ? it.h : 0;
+    const w = it.type === 'zone' || it.type === 'region' ? it.w : 0;
+    const h = it.type === 'zone' || it.type === 'region' ? it.h : 0;
     it.x = round2(clamp(from.x + dx, BOUNDS.xMin, BOUNDS.xMax - w));
     it.y = round2(clamp(from.y + dy, BOUNDS.yMin, BOUNDS.yMax - h));
   } else if ('x1' in it && 'x1' in from) {

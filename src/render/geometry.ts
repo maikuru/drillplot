@@ -81,13 +81,20 @@ export function arrowGeom(it: Arrow): ArrowGeometry {
   return { poly, d, mx, my };
 }
 
-/** Back to front: zones, lines, cones, machines, players, movement, ball paths, legend marks. Stable within a layer. */
-const LAYER: Record<Item['type'], number> = { zone: 0, line: 1, cone: 2, machine: 3, player: 4, move: 5, ball: 6, mark: 7 };
+/** Back to front: regions, zones, lines, cones, machines, players, movement, ball paths, legend marks. Stable within a layer. */
+const LAYER: Record<Item['type'], number> = { region: -1, zone: 0, line: 1, cone: 2, machine: 3, player: 4, move: 5, ball: 6, mark: 7 };
 export function drawOrder<T extends Item>(items: readonly T[]): T[] {
   return items
     .map((it, i) => [it, i] as const)
     .sort((a, b) => LAYER[a[0].type] - LAYER[b[0].type] || a[1] - b[1])
     .map((p) => p[0]);
+}
+
+/** Unreleased. The latest moment among the items (those of one court), or undefined when none has one. */
+export function latestMoment(items: readonly Item[]): number | undefined {
+  let m: number | undefined;
+  for (const it of items) if (it.moment !== undefined && (m === undefined || it.moment > m)) m = it.moment;
+  return m;
 }
 
 /** Position of an item for "is it inside this view" checks. */

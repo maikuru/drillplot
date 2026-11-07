@@ -29,8 +29,9 @@ All are exported values, read-only (`as const` or `Readonly`).
 | `PLAYER_COLORS` | `readonly ['orange', 'blue', 'white', 'black']` | The valid `team` values. |
 | `LEGACY_TEAMS` | `Readonly<Record<string, PlayerColor>>` | `{ t1: 'orange', t2: 'blue', coach: 'black' }`, the older keys that still open. |
 | `PATH_COLORS` | `readonly ['yellow', 'white', 'orange', 'red', 'pink', 'green', 'black']` | Since 0.2. The valid `color` values of ball paths, movement arrows, lines and legend swatches. |
+| `LABEL_POSITIONS` | `readonly ['center', 'top', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right']` | Unreleased. The valid `labelAt` values of a [region](format.md#named-regions). |
 
-`LIMITS` is `{ maxItems: 200, maxShot: 200, titleLength: 120, captionLength: 300, playerLabelLength: 8, zoneLabelLength: 24, zoneWidth: { min: 1, max: 20 }, zoneHeight: { min: 1, max: 44 }, noteLength: 16, coneLabelLength: 6, lineLabelLength: 24, keyLength: 3, legendEntries: 20, legendTextLength: 100, courts: { min: 1, max: 4 }, courtLabelLength: 24, courtLinkLength: 40 }`. The limits after `zoneHeight` are since 0.2.
+`LIMITS` is `{ maxItems: 200, maxShot: 200, titleLength: 120, captionLength: 300, playerLabelLength: 8, zoneLabelLength: 24, zoneWidth: { min: 1, max: 20 }, zoneHeight: { min: 1, max: 44 }, noteLength: 16, coneLabelLength: 6, lineLabelLength: 24, keyLength: 3, legendEntries: 20, legendTextLength: 100, courts: { min: 1, max: 4 }, courtLabelLength: 24, courtLinkLength: 40, moments: { min: 1, max: 9 }, tetherLength: 8, regionLabelLength: 24, regionWidth: { min: 0.5, max: 24 }, regionHeight: { min: 0.5, max: 48 } }`. The limits after `zoneHeight` are since 0.2, and those after `courtLinkLength` are unreleased.
 
 ```js
 import { COURT, BOUNDS, LIMITS } from 'drillplot';
@@ -217,6 +218,8 @@ Renders a source to a standalone SVG string.
 - **`options.greyscale`**: draw every color as its grey (luma, the same weights as the CSS `grayscale()` filter). For display only; exports should keep their colors.
 - **Returns** the SVG text. Deterministic: the same source gives the same text. Explicit fills and strokes (no CSS, no `currentColor`), a `viewBox`, `width` and `height` at 16 pixels per foot, `role="img"`, an `aria-label` and `<title>` (the title, or "Drill diagram"), a `<desc>` when there is a caption, the source in `<metadata>`, and no `id` or `class`. Text is XML-escaped and characters XML cannot carry are removed.
 - **Since 0.2**, a source with a `legend`, `showCaption` or `courts` draws a taller (or, with courts, wider) picture on a white page: the courts side by side (stacked in landscape), each clipped in its own nested `<svg>` viewport, then the legend and the caption under them. A source without those fields draws exactly as 0.1.1 did, byte for byte. Text is wrapped by an estimate of character widths, as there is no DOM to measure it.
+- **Unreleased:** a kitchen or half view with a `legend` or `showCaption` is clipped in a nested `<svg>` viewport too. Items of an earlier [moment](format.md#moments) are drawn faded, [tethers](format.md#tethers) are drawn under the players, and [regions](format.md#named-regions) under everything else.
+- **SVG only.** drillplot has no runtime dependencies, and rasterizing needs a font renderer, so there is no PNG output. To make one, draw the SVG on a canvas in a browser (an `Image` whose `src` is a `data:image/svg+xml` URL, then `canvas.toBlob()`), or use a headless browser or an SVG rasterizer in Node.
 - **Throws** nothing for valid input.
 
 ```js
@@ -361,9 +364,13 @@ type HalfSide = 'bottom' | 'top';
 type Orientation = 'portrait' | 'landscape';
 
 type PathColor = 'yellow' | 'white' | 'orange' | 'red' | 'pink' | 'green' | 'black'; // since 0.2
+type Hand = 'right' | 'left'; // unreleased
+type LabelPosition = 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'; // unreleased
 
-// Fields after the comment `// 0.2:` are optional, and absent from a source that does not use them.
-interface Player  { type: 'player';  x: number; y: number; label: string; team: PlayerColor; /* 0.2: */ note?: string; ghost?: boolean; key?: string; court?: number }
+// Fields after the comment `// 0.2:` (or `// next:`, unreleased) are optional, and absent from a source that does not use them.
+// Unreleased: every item may also carry `moment?: number` (1 to 9), written after `court`.
+interface Player  { type: 'player';  x: number; y: number; label: string; team: PlayerColor; /* 0.2: */ note?: string; ghost?: boolean; key?: string;
+                    /* next: */ hand?: Hand; tether?: string; /* 0.2: */ court?: number }
 interface Machine { type: 'machine'; x: number; y: number; angle: number; /* 0.2: */ key?: string; court?: number }
 interface Cone    { type: 'cone';    x: number; y: number; /* 0.2: */ label?: string; key?: string; court?: number }
 interface Zone    { type: 'zone';    x: number; y: number; w: number; h: number; label: string; /* 0.2: */ ghost?: boolean; key?: string; court?: number }
@@ -373,10 +380,12 @@ interface Ball    { type: 'ball';    x1: number; y1: number; x2: number; y2: num
 // since 0.2
 interface Line    { type: 'line';    x1: number; y1: number; x2: number; y2: number; color?: PathColor; dash?: boolean; label?: string; key?: string; court?: number }
 interface Mark    { type: 'mark';    x: number; y: number; key: string; court?: number }
-interface LegendEntry { key?: string; color?: PathColor; text: string }
+interface LegendEntry { key?: string; color?: PathColor; /* next: */ tether?: PlayerColor; text: string }
+// unreleased
+interface Region  { type: 'region';  x: number; y: number; w: number; h: number; label: string; labelAt?: LabelPosition; mirror?: boolean; key?: string; court?: number }
 interface Court   { label?: string; link?: string }
 
-type Item = Player | Machine | Cone | Zone | Move | Ball | Line | Mark;
+type Item = Player | Machine | Cone | Zone | Move | Ball | Line | Mark | Region;
 type ItemType = Item['type'];
 
 interface DrillSource {
@@ -400,7 +409,8 @@ type ErrorKey = 'not_json' | 'not_an_object' | 'wrong_format' | 'unsupported_ver
   | 'bad_orient' | 'items_not_array' | 'too_many_items' | 'item_not_object' | 'unknown_item_type'
   | 'not_a_number' | 'out_of_bounds' | 'bad_size' | 'bad_angle' | 'bad_team' | 'bad_bend'
   | 'bad_shot_number' | 'not_boolean' | 'bad_color' | 'bad_key' | 'bad_alt' | 'bad_court' | 'bad_courts'
-  | 'bad_legend' | 'no_svg_source' | 'bad_svg_source' | 'empty_input';
+  | 'bad_legend' | 'bad_moment' | 'bad_hand' | 'bad_tether' | 'bad_label_position'
+  | 'no_svg_source' | 'bad_svg_source' | 'empty_input';
 
 interface RenderOptions { greyscale?: boolean }
 interface Rect { x: number; y: number; w: number; h: number }

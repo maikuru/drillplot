@@ -1,7 +1,7 @@
 import type { DrillSource, Item } from '../format/types.js';
 import { stringifySource } from '../format/open.js';
-import { courtView, drawOrder, round2, viewBox, type Rect } from './geometry.js';
-import { courtMarkup, esc, FONT, itemMarkup, keyBadge, PATH_PALETTE, shotBadge, shotLabel, toGrey, type MarkupContext } from './markup.js';
+import { courtView, round2, viewBox, type Rect } from './geometry.js';
+import { courtMarkup, esc, FONT, itemsMarkup, keyBadge, PATH_PALETTE, shotBadge, shotLabel, tetherRope, toGrey, type MarkupContext } from './markup.js';
 
 export interface RenderOptions {
   /**
@@ -23,6 +23,8 @@ export function embedSource(source: DrillSource): string {
 
 const PAPER = '#ffffff';
 const INK = '#1a1a1a';
+/** The court's blue, behind a tether swatch. */
+const COURT_INK = '#2b6ca3';
 /** Space between courts: across the page in portrait, down it in landscape. */
 const GAP = { portrait: 6, landscape: 4 } as const;
 /** Height of the strip above the courts that carries their labels. */
@@ -79,6 +81,10 @@ function footer(source: DrillSource, x: number, top: number, width: number, ctx:
       const col = ctx.greyscale ? toGrey(PATH_PALETTE[e.color][0]) : PATH_PALETTE[e.color][0];
       const edge = ctx.greyscale ? toGrey(INK) : INK;
       svg += `<rect x="${round2(x + pad)}" y="${round2(cy - 0.3)}" width="1.7" height="0.6" fill="${col}" stroke="${edge}" stroke-width="0.06"/>`;
+    } else if (e.tether) {
+      // on white paper a white casing vanishes, so the swatch sits on a strip of court color
+      const court = ctx.greyscale ? toGrey(COURT_INK) : COURT_INK;
+      svg += `<rect x="${round2(x + pad)}" y="${round2(cy - 0.45)}" width="1.7" height="0.9" rx="0.15" fill="${court}"/>` + tetherRope(x + pad + 0.35, cy, x + pad + 1.35, cy, e.tether, flat);
     }
     lines.forEach((l, i) => (svg += textLine(l, x + pad + 2.2, cy + i * LINE_HEIGHT, ctx, ' dy="0.35em"')));
     y += Math.max(1, lines.length) * LINE_HEIGHT + 0.5;
@@ -95,7 +101,7 @@ function footer(source: DrillSource, x: number, top: number, width: number, ctx:
 /** One court with its items, turned for landscape. */
 function courtGroup(source: DrillSource, items: readonly Item[], ctx: MarkupContext): string {
   const world = source.orient === 'landscape' ? '<g transform="rotate(-90)">' : '<g>';
-  return world + courtMarkup(courtView(source.view, source.side), ctx) + '\n' + drawOrder(items).map((it) => itemMarkup(it, ctx)).join('\n') + '\n</g>';
+  return world + courtMarkup(courtView(source.view, source.side), ctx) + '\n' + itemsMarkup(items, ctx).join('\n') + '\n</g>';
 }
 
 /** Where each court sits on the page and how big the drawing is, before the footer. */
@@ -170,7 +176,11 @@ export function renderSvg(source: DrillSource, options: RenderOptions = {}): str
     // exactly the 0.1 drawing
     return head(viewBox(source.view, source.side, source.orient)) + courtGroup(source, source.items, ctx) + '\n</svg>';
   }
-  const { body, frame } = source.courts ? multiCourt(source, ctx) : { body: courtGroup(source, source.items, ctx) + '\n', frame: viewBox(source.view, source.side, source.orient) };
+  // A kitchen or half view frames part of the court, so it is clipped to its frame (in a nested
+  // viewport) before the footer goes under it. A full view draws nothing outside its frame, so it
+  // stays as 0.2 drew it.
+  const clip = !!source.courts || source.view !== 'full';
+  const { body, frame } = clip ? multiCourt(source, ctx) : { body: courtGroup(source, source.items, ctx) + '\n', frame: viewBox(source.view, source.side, source.orient) };
   const foot = footer(source, frame.x, frame.y + frame.h, frame.w, ctx);
   const page = { ...frame, h: round2(frame.h + foot.h) };
   const paper = ctx.greyscale ? toGrey(PAPER) : PAPER;
